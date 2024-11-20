@@ -30,6 +30,7 @@ opfs = [
 redb = ["dep:redb"]
 rocksdb = ["dep:rocksdb"]
 sled = ["dep:sled"]
+sqlite = ["dep:rusqlite"]
 tokio = [
     "fusio-dispatch/tokio",
     "fusio-parquet/tokio",
@@ -47,6 +48,10 @@ required-features = ["bytes", "tokio"]
 [[example]]
 name = "datafusion"
 required-features = ["datafusion"]
+
+[[example]]
+name = "sqlite"
+required-features = ["sqlite"]
 
 [[bench]]
 harness = false
@@ -95,6 +100,7 @@ parquet = { version = "53", default-features = false, features = [
 ] }
 pin-project-lite = "0.2"
 regex = "1"
+rusqlite = { version = "0.32" , features = ["vtab", "bundled"], optional = true}
 thiserror = "1"
 tokio = { version = "1", features = ["io-util"], default-features = false }
 tokio-util = { version = "0.7" }
