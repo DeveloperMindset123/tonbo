@@ -128,6 +128,8 @@ pub mod transaction;
 mod trigger;
 mod version;
 mod wal;
+#[cfg(feature = "net")]
+mod net;
 
 use std::{
     collections::HashMap, io, io::Cursor, marker::PhantomData, mem, ops::Bound, pin::pin, sync::Arc,

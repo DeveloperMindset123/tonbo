@@ -20,6 +20,7 @@ bytes = ["dep:bytes"]
 datafusion = ["dep:async-trait", "dep:datafusion"]
 default = ["aws", "bytes", "tokio", "tokio-http"]
 load_tbl = []
+net = ["dep:tonic", "dep:prost", "dep:tonic-build"]
 object-store = ["fusio/object_store"]
 opfs = [
     "dep:wasm-bindgen-futures",
@@ -101,11 +102,13 @@ parquet = { version = "53", default-features = false, features = [
 ] }
 parquet-lru = { version = "0.2.0", path = "parquet-lru" }
 pin-project-lite = "0.2"
+prost = { version = "0.13", optional = true }
 regex = "1"
 thiserror = "2.0.3"
 tokio = { version = "1", features = ["io-util"], default-features = false }
 tokio-util = { version = "0.7" }
 tonbo_macros = { version = "0.2.0", path = "tonbo_macros" }
+tonic = { version = "0.12", optional = true }
 tracing = "0.1"
 ulid = { version = "1", features = ["serde"] }
 
@@ -126,6 +129,9 @@ futures = { version = "0.3" }
 serde = "1"
 tempfile = "3"
 trybuild = "1.0"
+
+[build-dependencies]
+tonic-build = {version = "0.12", optional = true}
 
 [target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
 comfy-table = "7"
