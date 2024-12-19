@@ -17,7 +17,7 @@ use futures_util::StreamExt;
 use tokio::sync::RwLock;
 use tonbo::{
     executor::tokio::TokioExecutor,
-    record::{Column, Datatype, DynRecord, Record},
+    record::{Column, Datatype, DynRecord, Record, RecordInstance},
     serdes::{Decode, Encode},
     DbOption, DB,
 };
@@ -87,6 +87,11 @@ struct TonboService {
     write_limit: AtomicUsize,
 }
 
+fn primary_key_index(instance: &RecordInstance) -> usize {
+    // Tonbo will add `_null` and `_ts` before our schema columns, so the result should minus 2
+    instance.primary_key_index::<DynRecord>() - 2
+}
+
 #[tonic::async_trait]
 impl TonboRpc for TonboService {
     async fn create_table(
@@ -111,7 +116,7 @@ impl TonboRpc for TonboService {
         if let Some(db_instance) = guard.get(&req.table_name) {
             let instance = db_instance.instance();
 
-            if instance.primary_key_index::<DynRecord>() != req.primary_key_index as usize {
+            if primary_key_index(instance) != req.primary_key_index as usize {
                 return Err(Status::new(
                     Code::Internal,
                     "`primary_key_index` does not match the existing schema".to_string(),
@@ -161,7 +166,7 @@ impl TonboRpc for TonboService {
             .await
             .map_err(|e| Status::new(Code::Internal, e.to_string()))?;
         let record = if let Some(tuple) = tuple {
-            let primary_key_index = db_instance.instance().primary_key_index::<DynRecord>() - 2;
+            let primary_key_index = primary_key_index(db_instance.instance());
             let mut bytes = Vec::new();
             let mut writer = Cursor::new(&mut bytes);
             (tuple.len() as u32)
@@ -193,7 +198,7 @@ impl TonboRpc for TonboService {
         let Some(db_instance) = guard.get(&req.table_name) else {
             return Err(Status::new(Code::NotFound, "table not found"));
         };
-        let primary_key_index = db_instance.instance().primary_key_index::<DynRecord>() - 2;
+        let primary_key_index = primary_key_index(db_instance.instance());
         let db = db_instance.clone();
 
         let stream = stream! {
