@@ -312,7 +312,28 @@ let options = DbOption::new(
 <li>To learn more about tonbo by examples, you can refer to <a href="https://github.com/tonbo-io/tonbo/tree/main/examples">examples</a></li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><h1 id="tonbo-api"><a class="header" href="#tonbo-api">Tonbo API</a></h1>
-<!-- toc -->
+<ul>
+<li><a href="usage/tonbo.html#schema">Schema</a></li>
+<li><a href="usage/tonbo.html#operations">Operations</a>
+<ul>
+<li><a href="usage/tonbo.html#create-database">Create Database</a>
+<ul>
+<li><a href="usage/tonbo.html#dboption">DbOption</a></li>
+<li><a href="usage/tonbo.html#executor">Executor</a></li>
+</ul>
+</li>
+<li><a href="usage/tonbo.html#query">Query</a></li>
+<li><a href="usage/tonbo.html#insertremove">Insert/Remove</a></li>
+<li><a href="usage/tonbo.html#transaction">Transaction</a>
+<ul>
+<li><a href="usage/tonbo.html#query-1">Query</a></li>
+<li><a href="usage/tonbo.html#insertremove-1">Insert/Remove</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="usage/tonbo.html#using-s3-backends">Using S3 backends</a></li>
+</ul>
 <h2 id="schema"><a class="header" href="#schema">Schema</a></h2>
 <p>Tonbo provides ORM-like macro for ease of use, you can use <code>Record</code> macro to define schema of column family. Tonbo will generate all relevant code for you at compile time. For example, if you have a struct below</p>
 <pre><code class="language-rust">use tonbo::Record;
@@ -515,7 +536,13 @@ async fn main() {
 }</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><div style="break-before: page; page-break-before: always;"></div><h1 id="explore-tonbo"><a class="header" href="#explore-tonbo">Explore Tonbo</a></h1>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="configuration"><a class="header" href="#configuration">Configuration</a></h1>
-<!-- toc -->
+<ul>
+<li><a href="usage/conf.html#path-configuration">Path Configuration</a></li>
+<li><a href="usage/conf.html#manifest-configuration">Manifest Configuration</a></li>
+<li><a href="usage/conf.html#wal-configuration">WAL Configuration</a></li>
+<li><a href="usage/conf.html#compaction-configuration">Compaction Configuration</a></li>
+<li><a href="usage/conf.html#sstable-configuration">SSTable Configuration</a></li>
+</ul>
 <p>Tonbo provides a configuration struct <code>DbOption</code> for setting up the database. This section will introduce the configuration options available in Tonbo.</p>
 <h2 id="path-configuration"><a class="header" href="#path-configuration">Path Configuration</a></h2>
 <p>Tonbo will use local disk as the default storage option(For local is the tokio file, for wasm is the OPFS). If you want to change the default storage backends  <code>DbOption::base_path</code>.</p>
@@ -807,6 +834,7 @@ wasm-pack build --target web
 <div style="break-before: page; page-break-before: always;"></div><h1 id="tonbolite"><a class="header" href="#tonbolite">TonboLite</a></h1>
 <p>TonboLite is a WASM compatible SQLite extension that allows users to create tables which supports analytical processing directly in SQLite. Its storage engine is powered by our open-source embedded key-value database, <a href="https://github.com/tonbo-io/tonbo">Tonbo</a>.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="getting-started-1"><a class="header" href="#getting-started-1">Getting Started</a></h1>
+<p>TODO</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="building-tonbolite"><a class="header" href="#building-tonbolite">Building TonboLite</a></h1>
 <h3 id="build-as-extension"><a class="header" href="#build-as-extension">Build as Extension</a></h3>
 <p>To build TonboLite as an extension, you should enable loadable_extension features</p>
@@ -843,7 +871,18 @@ await tonbo.default();
 <p>TonboLite should be used in a <a href="https://developer.mozilla.org/en-US/docs/Web/Security/Secure_Contexts">secure context</a> and <a href="https://developer.mozilla.org/en-US/docs/Web/API/Window/crossOriginIsolated">cross-origin isolated</a>, since it uses <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer"><code>SharedArrayBuffer</code></a> to share memory. Please refer to <a href="https://web.dev/articles/coop-coep">this article</a> for a detailed explanation.</p>
 </div>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="usage"><a class="header" href="#usage">Usage</a></h1>
-<!-- toc -->
+<ul>
+<li><a href="tonbolite/usage.html#using-as-extension">Using as Extension</a>
+<ul>
+<li><a href="tonbolite/usage.html#loading-tonbolite-extension">Loading TonboLite Extension</a></li>
+<li><a href="tonbolite/usage.html#create-table">Create Table</a></li>
+<li><a href="tonbolite/usage.html#selectinsertupdatedelete">Select/Insert/Update/Delete</a></li>
+<li><a href="tonbolite/usage.html#flush">Flush</a></li>
+</ul>
+</li>
+<li><a href="tonbolite/usage.html#using-in-rust">Using in Rust</a></li>
+<li><a href="tonbolite/usage.html#using-in-javascript">Using in JavaScript</a></li>
+</ul>
 <h2 id="using-as-extension"><a class="header" href="#using-as-extension">Using as Extension</a></h2>
 <p>If you do not know how to build TonboLite, please refer to the <a href="tonbolite/./build.html">Building</a> section.</p>
 <h3 id="loading-tonbolite-extension"><a class="header" href="#loading-tonbolite-extension">Loading TonboLite Extension</a></h3>

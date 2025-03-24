@@ -150,7 +150,13 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="configuration"><a class="header" href="#configuration">Configuration</a></h1>
-<!-- toc -->
+<ul>
+<li><a href="#path-configuration">Path Configuration</a></li>
+<li><a href="#manifest-configuration">Manifest Configuration</a></li>
+<li><a href="#wal-configuration">WAL Configuration</a></li>
+<li><a href="#compaction-configuration">Compaction Configuration</a></li>
+<li><a href="#sstable-configuration">SSTable Configuration</a></li>
+</ul>
 <p>Tonbo provides a configuration struct <code>DbOption</code> for setting up the database. This section will introduce the configuration options available in Tonbo.</p>
 <h2 id="path-configuration"><a class="header" href="#path-configuration">Path Configuration</a></h2>
 <p>Tonbo will use local disk as the default storage option(For local is the tokio file, for wasm is the OPFS). If you want to change the default storage backends  <code>DbOption::base_path</code>.</p>

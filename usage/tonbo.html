@@ -150,7 +150,28 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="tonbo-api"><a class="header" href="#tonbo-api">Tonbo API</a></h1>
-<!-- toc -->
+<ul>
+<li><a href="#schema">Schema</a></li>
+<li><a href="#operations">Operations</a>
+<ul>
+<li><a href="#create-database">Create Database</a>
+<ul>
+<li><a href="#dboption">DbOption</a></li>
+<li><a href="#executor">Executor</a></li>
+</ul>
+</li>
+<li><a href="#query">Query</a></li>
+<li><a href="#insertremove">Insert/Remove</a></li>
+<li><a href="#transaction">Transaction</a>
+<ul>
+<li><a href="#query-1">Query</a></li>
+<li><a href="#insertremove-1">Insert/Remove</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#using-s3-backends">Using S3 backends</a></li>
+</ul>
 <h2 id="schema"><a class="header" href="#schema">Schema</a></h2>
 <p>Tonbo provides ORM-like macro for ease of use, you can use <code>Record</code> macro to define schema of column family. Tonbo will generate all relevant code for you at compile time. For example, if you have a struct below</p>
 <pre><code class="language-rust">use tonbo::Record;
