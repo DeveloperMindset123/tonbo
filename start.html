@@ -85,7 +85,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="introduction.html">Introduction</a></li><li class="chapter-item expanded "><a href="start.html" class="active"><strong aria-hidden="true">1.</strong> Getting Started</a></li><li class="chapter-item expanded "><a href="usage/index.html"><strong aria-hidden="true">2.</strong> Usage</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="usage/tonbo.html"><strong aria-hidden="true">2.1.</strong> Tonbo</a></li><li class="chapter-item expanded "><a href="usage/python.html"><strong aria-hidden="true">2.2.</strong> Python Binding</a></li><li class="chapter-item expanded "><a href="usage/wasm.html"><strong aria-hidden="true">2.3.</strong> JavaScript Binding</a></li><li class="chapter-item expanded "><a href="usage/advance.html"><strong aria-hidden="true">2.4.</strong> Advance</a></li><li class="chapter-item expanded "><a href="usage/conf.html"><strong aria-hidden="true">2.5.</strong> Configuration</a></li><li class="chapter-item expanded "><a href="usage/faq.html"><strong aria-hidden="true">2.6.</strong> FAQ</a></li></ol></li><li class="chapter-item expanded "><a href="examples/index.html"><strong aria-hidden="true">3.</strong> Examples</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="examples/declare.html"><strong aria-hidden="true">3.1.</strong> Using Tonbo</a></li><li class="chapter-item expanded "><a href="examples/datafusion.html"><strong aria-hidden="true">3.2.</strong> Integrate with Datafusio</a></li><li class="chapter-item expanded "><a href="examples/wasm.html"><strong aria-hidden="true">3.3.</strong> Using under Wasm</a></li></ol></li><li class="chapter-item expanded "><a href="contribution/index.html"><strong aria-hidden="true">4.</strong> Contribution</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="contribution/build.html"><strong aria-hidden="true">4.1.</strong> Building</a></li><li class="chapter-item expanded "><a href="contribution/testing.html"><strong aria-hidden="true">4.2.</strong> Testing</a></li></ol></li><li class="chapter-item expanded "><a href="tonbolite/index.html"><strong aria-hidden="true">5.</strong> TonboLite</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="tonbolite/start.html"><strong aria-hidden="true">5.1.</strong> Getting Started</a></li><li class="chapter-item expanded "><a href="tonbolite/build.html"><strong aria-hidden="true">5.2.</strong> Building</a></li><li class="chapter-item expanded "><a href="tonbolite/usage.html"><strong aria-hidden="true">5.3.</strong> Usage</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="introduction.html">Introduction</a></li><li class="chapter-item expanded "><a href="start.html" class="active"><strong aria-hidden="true">1.</strong> Getting Started</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.</strong> Usage</div></li><li><ol class="section"><li class="chapter-item expanded "><a href="usage/tonbo.html"><strong aria-hidden="true">2.1.</strong> Tonbo</a></li><li class="chapter-item expanded "><a href="usage/python.html"><strong aria-hidden="true">2.2.</strong> Python Binding</a></li><li class="chapter-item expanded "><a href="usage/wasm.html"><strong aria-hidden="true">2.3.</strong> JavaScript Binding</a></li><li class="chapter-item expanded "><a href="usage/conf.html"><strong aria-hidden="true">2.4.</strong> Configuration</a></li><li class="chapter-item expanded "><a href="usage/advance.html"><strong aria-hidden="true">2.5.</strong> Advance</a></li><li class="chapter-item expanded "><a href="usage/faq.html"><strong aria-hidden="true">2.6.</strong> FAQ</a></li></ol></li><li class="chapter-item expanded "><a href="examples/index.html"><strong aria-hidden="true">3.</strong> Examples</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="examples/declare.html"><strong aria-hidden="true">3.1.</strong> Using Tonbo</a></li><li class="chapter-item expanded "><a href="examples/datafusion.html"><strong aria-hidden="true">3.2.</strong> Integrate with Datafusio</a></li><li class="chapter-item expanded "><a href="examples/wasm.html"><strong aria-hidden="true">3.3.</strong> Using under Wasm</a></li></ol></li><li class="chapter-item expanded "><div><strong aria-hidden="true">4.</strong> Contribution</div></li><li><ol class="section"><li class="chapter-item expanded "><a href="contribution/build.html"><strong aria-hidden="true">4.1.</strong> Building</a></li><li class="chapter-item expanded "><a href="contribution/pr.html"><strong aria-hidden="true">4.2.</strong> Submiting PR</a></li></ol></li><li class="chapter-item expanded "><a href="tonbolite/index.html"><strong aria-hidden="true">5.</strong> TonboLite</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="tonbolite/start.html"><strong aria-hidden="true">5.1.</strong> Getting Started</a></li><li class="chapter-item expanded "><a href="tonbolite/build.html"><strong aria-hidden="true">5.2.</strong> Building and Testing</a></li><li class="chapter-item expanded "><a href="tonbolite/usage.html"><strong aria-hidden="true">5.3.</strong> Usage</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -150,15 +150,41 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="getting-started"><a class="header" href="#getting-started">Getting started</a></h1>
+<ul>
+<li><a href="#installation">Installation</a>
+<ul>
+<li><a href="#prerequisite">Prerequisite</a></li>
+<li><a href="#installation-1">Installation</a></li>
+</ul>
+</li>
+<li><a href="#using-tonbo">Using Tonbo</a>
+<ul>
+<li><a href="#defining-schema">Defining Schema</a></li>
+<li><a href="#creating-database">Creating database</a></li>
+<li><a href="#operations-on-database">Operations on Database</a></li>
+<li><a href="#insert">Insert</a></li>
+<li><a href="#remove">Remove</a></li>
+<li><a href="#get">Get</a></li>
+<li><a href="#scan">Scan</a>
+<ul>
+<li><a href="#using-transaction">Using transaction</a></li>
+</ul>
+</li>
+<li><a href="#persistence">Persistence</a></li>
+<li><a href="#using-in-s3">Using in S3</a></li>
+</ul>
+</li>
+<li><a href="#what-next">What next?</a></li>
+</ul>
 <h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
 <h3 id="prerequisite"><a class="header" href="#prerequisite">Prerequisite</a></h3>
 <p>To get started using tonbo you should make sure you have <a href="https://www.rust-lang.org/tools/install">Rust</a> installed on your system. If you haven't alreadly done yet, try following the instructions <a href="https://www.rust-lang.org/tools/install">here</a>.</p>
 <h3 id="installation-1"><a class="header" href="#installation-1">Installation</a></h3>
-<p>To use local disk as storage backend, you should import <a href="https://github.com/tokio-rs/tokio">tokio</a> crate and enable &quot;tokio&quot; feature (enabled by default)</p>
+<p>To use local disk as storage backend, you should import <a href="https://github.com/tokio-rs/tokio">tokio</a> crate and enable &quot;tokio&quot; feature (enabled by default) in the <em>Cargo.toml</em> file.</p>
 <pre><code class="language-toml">tokio = { version = &quot;1&quot;, features = [&quot;full&quot;] }
 tonbo = { git = &quot;https://github.com/tonbo-io/tonbo&quot; }
 </code></pre>
-<p>If you want to use tonbo in browser(use OPFS as storage backend), you should disable &quot;tokio&quot; feature and enable &quot;wasm&quot; feature. If you want to use S3 as backend, you also should enable &quot;wasm-http&quot; feature.</p>
+<p>If you want to use tonbo in browser(use OPFS as storage backend), you should disable &quot;<em>tokio</em>&quot; feature and enable &quot;<em>wasm</em>&quot; feature(As &quot;<em>tokio</em>&quot; is enabled by default, you should also disable <code>default-features</code>). If you want to use S3 as backend, you also should enable &quot;<em>wasm-http</em>&quot; feature.</p>
 <pre><code class="language-toml">tonbo = { git = &quot;https://github.com/tonbo-io/tonbo&quot;, default-features = false, features = [
     &quot;wasm&quot;,
     &quot;wasm-http&quot;,
@@ -212,17 +238,25 @@ async fn main() {
 <p><strong>Note:</strong> If you use tonbo in WASM, you should use <code>Path::from_opfs_path</code> rather than <code>Path::from_filesystem_path</code>.</p>
 </blockquote>
 <h3 id="operations-on-database"><a class="header" href="#operations-on-database">Operations on Database</a></h3>
-<p>After create <code>DB</code>, you can execute <code>insert</code>, <code>remove</code>, <code>get</code> and other operations now. But remember that you will get a <strong><code>UserRef</code> instance</strong> rather than the <code>User</code>, if you get record from tonbo. This is a struct that tonbo generates for you in the compile time. It may look like:</p>
+<p>After creating <code>DB</code>, you can execute <code>insert</code>, <code>remove</code>, <code>get</code> and other operations now. But remember that you will get a <strong><code>UserRef</code> instance</strong> that implements <code>RecordRef</code> trait rather than the <code>User</code>, if you get record from tonbo. This is a struct that tonbo generates for you in the compile time. It may look like:</p>
 <pre><code class="language-rust">#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub struct UserRef&lt;'r&gt; {
     pub name: &amp;'r str,
     pub email: Option&lt;&amp;'r str&gt;,
     pub age: Option&lt;u8&gt;,
+}
+impl RecordRef for UserRef&lt;'_&gt; {
+    // ......
 }</code></pre>
-<p>Then, you can start using tonbo like this:</p>
-<pre><code class="language-rust">db.insert(User { /* ... */ }).await.unwrap();
-
-let age = db.get(&amp;&quot;Alice&quot;.into(),
+<h3 id="insert"><a class="header" href="#insert">Insert</a></h3>
+<p><code>DB::insert</code> receives a <code>Record</code> instance which is the instance of struct you defined with <code>#[derive(Record)]</code>.</p>
+<pre><code class="language-rust">db.insert(User { /* ... */ }).await.unwrap();</code></pre>
+<h3 id="remove"><a class="header" href="#remove">Remove</a></h3>
+<p><code>DB::remove</code> receives a <code>Key</code> which is the type of <code>#[record(primary_key)]</code>. This method will remove the record that specified by the given <code>Key</code>.</p>
+<pre><code class="language-rust">db.remove(&quot;Alice&quot;.into()).await.unwrap();</code></pre>
+<h3 id="get"><a class="header" href="#get">Get</a></h3>
+<p><code>DB::get</code> receives a <code>Key</code> and process the record with a closure that receives a <code>TransactionEntry</code>. You can use <code>TransactionEntry::get</code> to get the record which is the type of <code>RecordRef</code>.</p>
+<pre><code class="language-rust">let age = db.get(&amp;&quot;Alice&quot;.into(),
     |entry| {
         // entry.get() will get a `UserRef`
         let user = entry.get();
@@ -230,9 +264,25 @@ let age = db.get(&amp;&quot;Alice&quot;.into(),
         user.age
     })
     .await
-    .unwrap();
+    .unwrap();</code></pre>
+<h3 id="scan"><a class="header" href="#scan">Scan</a></h3>
+<p>Like <code>DB::get</code>, <code>DB::scan</code> receives a closure that process <code>TransactionEntry</code>. The difference is that <code>DB::scan</code> receives a range of <code>Key</code>s and process all data that satisfied with the closure.</p>
+<pre><code class="language-rust">let lower = &quot;Alice&quot;.into();
+let upper = &quot;Bob&quot;.into();
+let stream = db
+    .scan(
+        (Bound::Included(&amp;lower), Bound::Excluded(&amp;upper)),
+        |entry| {
+            let record_ref = entry.get();
 
-db.remove(&quot;Alice&quot;.into()).await.unwrap();</code></pre>
+            record_ref.age
+        },
+    )
+    .await;
+let mut stream = std::pin::pin!(stream);
+while let Some(data) = stream.next().await.transpose().unwrap() {
+    // ...
+}</code></pre>
 <h4 id="using-transaction"><a class="header" href="#using-transaction">Using transaction</a></h4>
 <p>Tonbo supports transaction. You can also push down filter, limit and projection operators in query.</p>
 <pre><code class="language-rust">// create transaction
@@ -274,7 +324,7 @@ while let Some(entry) = scan.next().await.transpose().unwrap() {
 <h3 id="using-in-s3"><a class="header" href="#using-in-s3">Using in S3</a></h3>
 <p>If you want to use Tonbo in S3, you can configure <code>DbOption</code> to specify which part of the data to store in S3 and which part to store in local disk. Here is an example:</p>
 <pre><code class="language-rust">let s3_option = FsOptions::S3 {
-    bucket: &quot;wasm-data&quot;.to_string(),
+    bucket: &quot;bucket&quot;.to_string(),
     credential: Some(AwsCredential {
         key_id: &quot;key_id&quot;.to_string(),
         secret_key: &quot;secret_key&quot;.to_string(),
@@ -290,7 +340,14 @@ let options = DbOption::new(
     &amp;UserSchema,
 ).level_path(2, &quot;l2&quot;, s3_option.clone())
 ).level_path(3, &quot;l3&quot;, s3_option);</code></pre>
-<p>In this example, the data of level 2 and level 3 will be stored in S3 and the rest of the data will be stored in local disk.</p>
+<p>In this example, the data of level 2 and level 3 will be stored in S3 and the rest of the data will be stored in local disk. If there are data in level 2 and level 3, you can find them in S3 like this:</p>
+<pre><code class="language-bash">s3://bucket/l2/
+├── xxx.parquet
+├── ......
+s3://bucket/l3/
+├── xxx.parquet
+├── ......
+</code></pre>
 <p>For more configuration options, please refer to the <a href="./usage/conf.html">Configuration</a> section.</p>
 <h2 id="what-next"><a class="header" href="#what-next">What next?</a></h2>
 <ul>
@@ -310,7 +367,7 @@ let options = DbOption::new(
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next" href="usage/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next" href="usage/tonbo.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -324,7 +381,7 @@ let options = DbOption::new(
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next" href="usage/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next" href="usage/tonbo.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

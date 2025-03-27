@@ -85,7 +85,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../introduction.html">Introduction</a></li><li class="chapter-item expanded "><a href="../start.html"><strong aria-hidden="true">1.</strong> Getting Started</a></li><li class="chapter-item expanded "><a href="../usage/index.html"><strong aria-hidden="true">2.</strong> Usage</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../usage/tonbo.html" class="active"><strong aria-hidden="true">2.1.</strong> Tonbo</a></li><li class="chapter-item expanded "><a href="../usage/python.html"><strong aria-hidden="true">2.2.</strong> Python Binding</a></li><li class="chapter-item expanded "><a href="../usage/wasm.html"><strong aria-hidden="true">2.3.</strong> JavaScript Binding</a></li><li class="chapter-item expanded "><a href="../usage/advance.html"><strong aria-hidden="true">2.4.</strong> Advance</a></li><li class="chapter-item expanded "><a href="../usage/conf.html"><strong aria-hidden="true">2.5.</strong> Configuration</a></li><li class="chapter-item expanded "><a href="../usage/faq.html"><strong aria-hidden="true">2.6.</strong> FAQ</a></li></ol></li><li class="chapter-item expanded "><a href="../examples/index.html"><strong aria-hidden="true">3.</strong> Examples</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../examples/declare.html"><strong aria-hidden="true">3.1.</strong> Using Tonbo</a></li><li class="chapter-item expanded "><a href="../examples/datafusion.html"><strong aria-hidden="true">3.2.</strong> Integrate with Datafusio</a></li><li class="chapter-item expanded "><a href="../examples/wasm.html"><strong aria-hidden="true">3.3.</strong> Using under Wasm</a></li></ol></li><li class="chapter-item expanded "><a href="../contribution/index.html"><strong aria-hidden="true">4.</strong> Contribution</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../contribution/build.html"><strong aria-hidden="true">4.1.</strong> Building</a></li><li class="chapter-item expanded "><a href="../contribution/testing.html"><strong aria-hidden="true">4.2.</strong> Testing</a></li></ol></li><li class="chapter-item expanded "><a href="../tonbolite/index.html"><strong aria-hidden="true">5.</strong> TonboLite</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../tonbolite/start.html"><strong aria-hidden="true">5.1.</strong> Getting Started</a></li><li class="chapter-item expanded "><a href="../tonbolite/build.html"><strong aria-hidden="true">5.2.</strong> Building</a></li><li class="chapter-item expanded "><a href="../tonbolite/usage.html"><strong aria-hidden="true">5.3.</strong> Usage</a></li></ol></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../introduction.html">Introduction</a></li><li class="chapter-item expanded "><a href="../start.html"><strong aria-hidden="true">1.</strong> Getting Started</a></li><li class="chapter-item expanded "><div><strong aria-hidden="true">2.</strong> Usage</div></li><li><ol class="section"><li class="chapter-item expanded "><a href="../usage/tonbo.html" class="active"><strong aria-hidden="true">2.1.</strong> Tonbo</a></li><li class="chapter-item expanded "><a href="../usage/python.html"><strong aria-hidden="true">2.2.</strong> Python Binding</a></li><li class="chapter-item expanded "><a href="../usage/wasm.html"><strong aria-hidden="true">2.3.</strong> JavaScript Binding</a></li><li class="chapter-item expanded "><a href="../usage/conf.html"><strong aria-hidden="true">2.4.</strong> Configuration</a></li><li class="chapter-item expanded "><a href="../usage/advance.html"><strong aria-hidden="true">2.5.</strong> Advance</a></li><li class="chapter-item expanded "><a href="../usage/faq.html"><strong aria-hidden="true">2.6.</strong> FAQ</a></li></ol></li><li class="chapter-item expanded "><a href="../examples/index.html"><strong aria-hidden="true">3.</strong> Examples</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../examples/declare.html"><strong aria-hidden="true">3.1.</strong> Using Tonbo</a></li><li class="chapter-item expanded "><a href="../examples/datafusion.html"><strong aria-hidden="true">3.2.</strong> Integrate with Datafusio</a></li><li class="chapter-item expanded "><a href="../examples/wasm.html"><strong aria-hidden="true">3.3.</strong> Using under Wasm</a></li></ol></li><li class="chapter-item expanded "><div><strong aria-hidden="true">4.</strong> Contribution</div></li><li><ol class="section"><li class="chapter-item expanded "><a href="../contribution/build.html"><strong aria-hidden="true">4.1.</strong> Building</a></li><li class="chapter-item expanded "><a href="../contribution/pr.html"><strong aria-hidden="true">4.2.</strong> Submiting PR</a></li></ol></li><li class="chapter-item expanded "><a href="../tonbolite/index.html"><strong aria-hidden="true">5.</strong> TonboLite</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../tonbolite/start.html"><strong aria-hidden="true">5.1.</strong> Getting Started</a></li><li class="chapter-item expanded "><a href="../tonbolite/build.html"><strong aria-hidden="true">5.2.</strong> Building and Testing</a></li><li class="chapter-item expanded "><a href="../tonbolite/usage.html"><strong aria-hidden="true">5.3.</strong> Usage</a></li></ol></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -269,19 +269,21 @@ while let Some(entry) = scan.next().await.transpose().unwrap() {
     // ......
 }</code></pre>
 <h3 id="insertremove"><a class="header" href="#insertremove">Insert/Remove</a></h3>
-<p>You can use <code>db.insert(record)</code> or <code>db.insert_batch(records)</code> to insert new records into the database and use <code>db.remove(key)</code> to remove a record from the database. Here is an example of how to use transaction to update the state of database:</p>
-<pre><code class="language-rust">
-/// insert a single tonbo record
-db.insert(User {
+<p>You can use <code>db.insert(record)</code> or <code>db.insert_batch(records)</code> to insert new records into the database and use <code>db.remove(key)</code> to remove a record from the database. Here is an example of updating the state of database:</p>
+<pre><code class="language-rust">let user = User {
     name: &quot;Alice&quot;.into(),
     email: Some(&quot;alice@gmail.com&quot;.into()),
     age: 22,
     bytes: Bytes::from(vec![0, 1, 2]),
-})
-.await
-.unwrap();
+};
+
+/// insert a single tonbo record
+db.insert(user).await.unwrap();
 
 /// insert a sequence of data as a single batch
+db.insert_batch(&quot;Alice&quot;.into()).await.unwrap();
+
+/// remove the specified record from the database
 db.remove(&quot;Alice&quot;.into()).await.unwrap();</code></pre>
 <h3 id="transaction"><a class="header" href="#transaction">Transaction</a></h3>
 <p>Tonbo supports transactions when using a <code>Transaction</code>. You can use <code>db.transaction()</code> to create a transaction, and use <code>txn.commit()</code> to commit the transaction.</p>
@@ -377,7 +379,7 @@ async fn main() {
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                            <a rel="prev" href="../usage/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="../start.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
@@ -391,7 +393,7 @@ async fn main() {
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                    <a rel="prev" href="../usage/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="../start.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
 
