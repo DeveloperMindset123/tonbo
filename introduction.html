@@ -150,8 +150,9 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="what-is-tonbo"><a class="header" href="#what-is-tonbo">What is Tonbo?</a></h1>
-<p><a href="https://github.com/tonbo-io/tonbo">Tonbo</a> is an in-process KV database that can be embedded in data-intensive applications written in Rust, Python, or JavaScript (WebAssembly/Deno). It is designed for analytical processing. Tonbo can efficiently write data in real time in edge environments such as browsers and AWS Lambda, with the data stored in memory, on local disks, or in S3 using Apache Parquet format.
-Building data-intensive applications in Rust using Tonbo is very convenient. You just need to declare the dependency in your <code>Cargo.toml</code> file and then create the embedded database:</p>
+<p><a href="https://github.com/tonbo-io/tonbo">Tonbo</a> is an in-process KV database that can be embedded in data-intensive applications written in Rust, Python, or JavaScript (WebAssembly / Deno). It is designed for analytical processing. Tonbo can efficiently write data in real time in edge environments such as browsers and AWS Lambda, with the data stored in memory, on local disks, or in S3 using Apache Parquet format.</p>
+<h2 id="build-with-schema"><a class="header" href="#build-with-schema">Build with schema</a></h2>
+<p>Building data-intensive applications in Rust using Tonbo is convenient. You just need to declare the dependency in your <code>Cargo.toml</code> file and then create the embedded database. Tonbo supports:</p>
 <pre><code class="language-rust">#[derive(tonbo::Record)]
 pub struct User {
     #[record(primary_key)]
@@ -165,7 +166,34 @@ async fn main() {
         .await
         .unwrap();
 }</code></pre>
-<p>Compared to other analytical databases, Tonbo is extremely lightweight—only 1.3MB when compressed. In addition to being embedded directly as a KV database within applications, Tonbo can also serve as an analytical enhancement for existing OLTP databases. For example, Tonbolite is a SQLite plugin built on Tonbo that provides SQLite with highly compressed, analytical-ready tables using Arrow/Parquet to boost query efficiency. Moreover, it can run alongside SQLite in various environments such as browsers and Linux:</p>
+<h2 id="all-in-parquet"><a class="header" href="#all-in-parquet">All in Parquet</a></h2>
+<p>Tonbo organizes all stored data as Apache Parquet files. At each level, these files can reside in memory, on disk, or in S3. This design lets users process their data without any vendor lock-in, including with Tonbo.</p>
+<pre><code>			╔═tonbo═════════════════════════════════════════════════════╗
+			║                                                           ║
+			║    ┌──────╂─client storage─┐  ┌──────╂─client storage─┐   ║
+			║    │ ┏━━━━▼━━━━┓           │  │ ┏━━━━▼━━━━┓           │   ║
+			║    │ ┃ parquet ┃           │  │ ┃ parquet ┃           │   ║
+			║    │ ┗━━━━┳━━━━┛           │  │ ┗━━━━┳━━━━┛           │   ║
+			║    └──────╂────────────────┘  └──────╂────────────────┘   ║
+			║           ┣━━━━━━━━━━━━━━━━━━━━━━━━━━┛                    ║
+			║    ┌──────╂────────────────────────────────server ssd─┐   ║
+			║    │      ┣━━━━━━━━━━━┓                               │   ║
+			║    │ ┏━━━━▼━━━━┓ ┏━━━━▼━━━━┓                          │   ║
+			║    │ ┃ parquet ┃ ┃ parquet ┃                          │   ║
+			║    │ ┗━━━━┳━━━━┛ ┗━━━━┳━━━━┛                          │   ║
+			║    └──────╂───────────╂───────────────────────────────┘   ║
+			║    ┌──────╂───────────╂────────object storage service─┐   ║
+			║    │      ┣━━━━━━━━━━━╋━━━━━━━━━━━┳━━━━━━━━━━━┓       │   ║
+			║    │ ┏━━━━▼━━━━┓ ┏━━━━▼━━━━┓ ┏━━━━▼━━━━┓ ┏━━━━▼━━━━┓  │   ║
+			║    │ ┃ parquet ┃ ┃ parquet ┃ ┃ parquet ┃ ┃ parquet ┃  │   ║
+			║    │ ┗━━━━━━━━━┛ ┗━━━━━━━━━┛ ┗━━━━━━━━━┛ ┗━━━━━━━━━┛  │   ║
+			║    └──────────────────────────────────────────────────┘   ║
+			║                                                           ║
+			╚═══════════════════════════════════════════════════════════╝
+</code></pre>
+<h2 id="easy-to-be-integrated"><a class="header" href="#easy-to-be-integrated">Easy to be integrated</a></h2>
+<p>Compared to other analytical databases, Tonbo is extremely lightweight—only 1.3MB when compressed. In addition to being embedded directly as a KV database within applications, Tonbo can also serve as an analytical enhancement for existing OLTP databases.</p>
+<p>For example, <a href="https://github.com/tonbo-io/tonbolite">Tonbolite</a> is a SQLite plugin built on Tonbo that provides SQLite with highly compressed, analytical-ready tables using Arrow/Parquet to boost query efficiency. Moreover, it can run alongside SQLite in various environments such as browsers and Linux:</p>
 <pre><code>sqlite&gt; .load target/release/libsqlite_tonbo
 
 sqlite&gt; CREATE VIRTUAL TABLE temp.tonbo USING tonbo(

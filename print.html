@@ -151,8 +151,9 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="what-is-tonbo"><a class="header" href="#what-is-tonbo">What is Tonbo?</a></h1>
-<p><a href="https://github.com/tonbo-io/tonbo">Tonbo</a> is an in-process KV database that can be embedded in data-intensive applications written in Rust, Python, or JavaScript (WebAssembly/Deno). It is designed for analytical processing. Tonbo can efficiently write data in real time in edge environments such as browsers and AWS Lambda, with the data stored in memory, on local disks, or in S3 using Apache Parquet format.
-Building data-intensive applications in Rust using Tonbo is very convenient. You just need to declare the dependency in your <code>Cargo.toml</code> file and then create the embedded database:</p>
+<p><a href="https://github.com/tonbo-io/tonbo">Tonbo</a> is an in-process KV database that can be embedded in data-intensive applications written in Rust, Python, or JavaScript (WebAssembly / Deno). It is designed for analytical processing. Tonbo can efficiently write data in real time in edge environments such as browsers and AWS Lambda, with the data stored in memory, on local disks, or in S3 using Apache Parquet format.</p>
+<h2 id="build-with-schema"><a class="header" href="#build-with-schema">Build with schema</a></h2>
+<p>Building data-intensive applications in Rust using Tonbo is convenient. You just need to declare the dependency in your <code>Cargo.toml</code> file and then create the embedded database. Tonbo supports:</p>
 <pre><code class="language-rust">#[derive(tonbo::Record)]
 pub struct User {
     #[record(primary_key)]
@@ -166,7 +167,34 @@ async fn main() {
         .await
         .unwrap();
 }</code></pre>
-<p>Compared to other analytical databases, Tonbo is extremely lightweight—only 1.3MB when compressed. In addition to being embedded directly as a KV database within applications, Tonbo can also serve as an analytical enhancement for existing OLTP databases. For example, Tonbolite is a SQLite plugin built on Tonbo that provides SQLite with highly compressed, analytical-ready tables using Arrow/Parquet to boost query efficiency. Moreover, it can run alongside SQLite in various environments such as browsers and Linux:</p>
+<h2 id="all-in-parquet"><a class="header" href="#all-in-parquet">All in Parquet</a></h2>
+<p>Tonbo organizes all stored data as Apache Parquet files. At each level, these files can reside in memory, on disk, or in S3. This design lets users process their data without any vendor lock-in, including with Tonbo.</p>
+<pre><code>			╔═tonbo═════════════════════════════════════════════════════╗
+			║                                                           ║
+			║    ┌──────╂─client storage─┐  ┌──────╂─client storage─┐   ║
+			║    │ ┏━━━━▼━━━━┓           │  │ ┏━━━━▼━━━━┓           │   ║
+			║    │ ┃ parquet ┃           │  │ ┃ parquet ┃           │   ║
+			║    │ ┗━━━━┳━━━━┛           │  │ ┗━━━━┳━━━━┛           │   ║
+			║    └──────╂────────────────┘  └──────╂────────────────┘   ║
+			║           ┣━━━━━━━━━━━━━━━━━━━━━━━━━━┛                    ║
+			║    ┌──────╂────────────────────────────────server ssd─┐   ║
+			║    │      ┣━━━━━━━━━━━┓                               │   ║
+			║    │ ┏━━━━▼━━━━┓ ┏━━━━▼━━━━┓                          │   ║
+			║    │ ┃ parquet ┃ ┃ parquet ┃                          │   ║
+			║    │ ┗━━━━┳━━━━┛ ┗━━━━┳━━━━┛                          │   ║
+			║    └──────╂───────────╂───────────────────────────────┘   ║
+			║    ┌──────╂───────────╂────────object storage service─┐   ║
+			║    │      ┣━━━━━━━━━━━╋━━━━━━━━━━━┳━━━━━━━━━━━┓       │   ║
+			║    │ ┏━━━━▼━━━━┓ ┏━━━━▼━━━━┓ ┏━━━━▼━━━━┓ ┏━━━━▼━━━━┓  │   ║
+			║    │ ┃ parquet ┃ ┃ parquet ┃ ┃ parquet ┃ ┃ parquet ┃  │   ║
+			║    │ ┗━━━━━━━━━┛ ┗━━━━━━━━━┛ ┗━━━━━━━━━┛ ┗━━━━━━━━━┛  │   ║
+			║    └──────────────────────────────────────────────────┘   ║
+			║                                                           ║
+			╚═══════════════════════════════════════════════════════════╝
+</code></pre>
+<h2 id="easy-to-be-integrated"><a class="header" href="#easy-to-be-integrated">Easy to be integrated</a></h2>
+<p>Compared to other analytical databases, Tonbo is extremely lightweight—only 1.3MB when compressed. In addition to being embedded directly as a KV database within applications, Tonbo can also serve as an analytical enhancement for existing OLTP databases.</p>
+<p>For example, <a href="https://github.com/tonbo-io/tonbolite">Tonbolite</a> is a SQLite plugin built on Tonbo that provides SQLite with highly compressed, analytical-ready tables using Arrow/Parquet to boost query efficiency. Moreover, it can run alongside SQLite in various environments such as browsers and Linux:</p>
 <pre><code>sqlite&gt; .load target/release/libsqlite_tonbo
 
 sqlite&gt; CREATE VIRTUAL TABLE temp.tonbo USING tonbo(
@@ -207,20 +235,21 @@ sqlite&gt; select * from tonbo;
 </ul>
 </li>
 <li><a href="start.html#persistence">Persistence</a></li>
-<li><a href="start.html#using-in-s3">Using in S3</a></li>
+<li><a href="start.html#using-with-s3">Using with S3</a></li>
 </ul>
 </li>
 <li><a href="start.html#what-next">What next?</a></li>
 </ul>
 <h2 id="installation"><a class="header" href="#installation">Installation</a></h2>
 <h3 id="prerequisite"><a class="header" href="#prerequisite">Prerequisite</a></h3>
-<p>To get started using tonbo you should make sure you have <a href="https://www.rust-lang.org/tools/install">Rust</a> installed on your system. If you haven't already done yet, try following the instructions <a href="https://www.rust-lang.org/tools/install">here</a>.</p>
+<p>To get started with Tonbo, ensure that Rust is installed on your system. If you haven't installed it yet, please follow the <a href="https://www.rust-lang.org/tools/install">installation instructions</a>.</p>
 <h3 id="installation-1"><a class="header" href="#installation-1">Installation</a></h3>
-<p>To use local disk as storage backend, you should import <a href="https://github.com/tokio-rs/tokio">tokio</a> crate and enable &quot;tokio&quot; feature (enabled by default) in the <em>Cargo.toml</em> file.</p>
+<p>Tonbo supports various target platforms (native, AWS Lambda, browsers, etc.) and storage backends (memory, local disk, S3, etc.). Built on asynchronous Rust, Tonbo improves database operation efficiency, which means you must configure an async runtime for your target platform.</p>
+<p>For native platforms, <a href="https://github.com/tokio-rs/tokio">Tokio</a> is the most popular async runtime in Rust. To use Tonbo with Tokio, ensure the tokio feature is enabled in your <code>Cargo.toml</code> file (enabled by default):</p>
 <pre><code class="language-toml">tokio = { version = &quot;1&quot;, features = [&quot;full&quot;] }
 tonbo = { git = &quot;https://github.com/tonbo-io/tonbo&quot; }
 </code></pre>
-<p>If you want to use tonbo in browser(use OPFS as storage backend), you should disable &quot;<em>tokio</em>&quot; feature and enable &quot;<em>wasm</em>&quot; feature(As &quot;<em>tokio</em>&quot; is enabled by default, you should also disable <code>default-features</code>). If you want to use S3 as backend, you also should enable &quot;<em>wasm-http</em>&quot; feature.</p>
+<p>For browser targets using OPFS as the storage backend, disable the <code>tokio</code> feature and enable the <code>wasm</code> feature because Tokio is incompatible with OPFS. Since <code>tokio</code> is enabled by default, you must disable default features. If you plan to use S3 as the backend, also enable the <code>wasm-http</code> feature:</p>
 <pre><code class="language-toml">tonbo = { git = &quot;https://github.com/tonbo-io/tonbo&quot;, default-features = false, features = [
     &quot;wasm&quot;,
     &quot;wasm-http&quot;,
@@ -228,7 +257,7 @@ tonbo = { git = &quot;https://github.com/tonbo-io/tonbo&quot; }
 </code></pre>
 <h2 id="using-tonbo"><a class="header" href="#using-tonbo">Using Tonbo</a></h2>
 <h3 id="defining-schema"><a class="header" href="#defining-schema">Defining Schema</a></h3>
-<p>Tonbo provides ORM-like macro for ease of use, you can use <code>Record</code> macro to define schema of column family. Tonbo will generate all relevant code for you at compile time.</p>
+<p>Tonbo offers an ORM-like macro that simplifies working with column families. Use the Record macro to define your column family's schema, and Tonbo will automatically generate all necessary code at compile time:</p>
 <pre><code class="language-rust">use tonbo::Record;
 
 #[derive(Record, Debug)]
@@ -238,20 +267,21 @@ pub struct User {
     email: Option&lt;String&gt;,
     age: u8,
 }</code></pre>
+<p>Further explanation of this example:</p>
 <ul>
-<li><code>Record</code>: Declare this struct as a Tonbo Schema</li>
-<li><code>#[record(primary_key)]</code>: Declare this key as primary key. Compound primary key is not supported now.</li>
-<li><code>Option</code> type represents this field can be null, otherwise it can not be null.</li>
+<li><code>Record</code>: This attribute marks the struct as a Tonbo schema definition, meaning it represents the structure of a column family.</li>
+<li><code>#[record(primary_key)]</code>: This attribute designates the corresponding field as the primary key. Note that Tonbo currently does not support compound primary keys, so the primary key must be unique.</li>
+<li><code>Option</code>: When a field is wrapped in Option, it indicates that the field is nullable.</li>
 </ul>
-<p>Now, Tonbo support these types:</p>
+<p>Tonbo supports the following data types:</p>
 <ul>
-<li>Number type: <code>i8</code>, <code>i16</code>, <code>i32</code>, <code>i64</code>, <code>u8</code>, <code>u16</code>, <code>u32</code>, <code>u64</code></li>
-<li>Boolean type: <code>bool</code></li>
-<li>String type: <code>String</code></li>
-<li>Bytes: <code>bytes::Bytes</code></li>
+<li>Number types: i8, i16, i32, i64, u8, u16, u32, u64</li>
+<li>Boolean type: bool</li>
+<li>String type: String</li>
+<li>Bytes type: bytes::Bytes</li>
 </ul>
 <h3 id="creating-database"><a class="header" href="#creating-database">Creating database</a></h3>
-<p>After define you schema, you can create <code>DB</code> with a customized <code>DbOption</code></p>
+<p>After defining your schema, you can create a <code>DB</code> instance using a customized <code>DbOption</code>.</p>
 <pre><code class="language-rust">use std::fs;
 use fusio::path::Path;
 use tonbo::{executor::tokio::TokioExecutor, DbOption, DB};
@@ -269,12 +299,10 @@ async fn main() {
         .await
         .unwrap();
 }</code></pre>
-<p><code>UserSchema</code> is a struct that tonbo generates for you in the compile time, so you do not need to import it.  One thing you need to pay attention to is: you should <strong>make sure the path exists</strong> before creating <code>DBOption</code>.</p>
-<blockquote>
-<p><strong>Note:</strong> If you use tonbo in WASM, you should use <code>Path::from_opfs_path</code> rather than <code>Path::from_filesystem_path</code>.</p>
-</blockquote>
+<p>Tonbo automatically generates the <code>UserSchema</code> struct at compile time, so you don’t need to handle it manually. However, ensure that the specified path exists before creating your DBOption.</p>
+<p>When using Tonbo in a WASM environment, use <code>Path::from_opfs_path</code> instead of <code>Path::from_filesystem_path</code>.</p>
 <h3 id="operations-on-database"><a class="header" href="#operations-on-database">Operations on Database</a></h3>
-<p>After creating <code>DB</code>, you can execute <code>insert</code>, <code>remove</code>, <code>get</code> and other operations now. But remember that you will get a <strong><code>UserRef</code> instance</strong> that implements <code>RecordRef</code> trait rather than the <code>User</code>, if you get record from tonbo. This is a struct that tonbo generates for you in the compile time. It may look like:</p>
+<p>After creating the DB, you can perform operations like <code>insert</code>, <code>remove</code>, and <code>get</code>. However, when you retrieve a record from Tonbo, you'll receive a <code>UserRef</code> instance—not a direct <code>User</code> instance. The <code>UserRef</code> struct, which implements the <code>RecordRef</code> trait, is automatically generated by Tonbo at compile time. It might look something like this:</p>
 <pre><code class="language-rust">#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub struct UserRef&lt;'r&gt; {
     pub name: &amp;'r str,
@@ -285,13 +313,13 @@ impl RecordRef for UserRef&lt;'_&gt; {
     // ......
 }</code></pre>
 <h3 id="insert"><a class="header" href="#insert">Insert</a></h3>
-<p><code>DB::insert</code> receives a <code>Record</code> instance which is the instance of struct you defined with <code>#[derive(Record)]</code>.</p>
+<p><code>DB::insert</code> takes a <code>Record</code> instance—specifically, an instance of the struct you've defined with <code>#[derive(Record)]</code>:</p>
 <pre><code class="language-rust">db.insert(User { /* ... */ }).await.unwrap();</code></pre>
 <h3 id="remove"><a class="header" href="#remove">Remove</a></h3>
-<p><code>DB::remove</code> receives a <code>Key</code> which is the type of <code>#[record(primary_key)]</code>. This method will remove the record that specified by the given <code>Key</code>.</p>
+<p><code>DB::remove</code> accepts a Key, where the type of the key is defined by the field annotated with <code>#[record(primary_key)]</code>. This method removes the record associated with the provided key:</p>
 <pre><code class="language-rust">db.remove(&quot;Alice&quot;.into()).await.unwrap();</code></pre>
 <h3 id="get"><a class="header" href="#get">Get</a></h3>
-<p><code>DB::get</code> receives a <code>Key</code> and process the record with a closure that receives a <code>TransactionEntry</code>. You can use <code>TransactionEntry::get</code> to get the record which is the type of <code>RecordRef</code>.</p>
+<p><code>DB::get</code> accepts a <code>Key</code> and processes the corresponding record using a closure that receives a <code>TransactionEntry</code>. Within the closure, you can call <code>TransactionEntry::get</code> to retrieve the record as a <code>RecordRef</code> instance:</p>
 <pre><code class="language-rust">let age = db.get(&amp;&quot;Alice&quot;.into(),
     |entry| {
         // entry.get() will get a `UserRef`
@@ -302,7 +330,7 @@ impl RecordRef for UserRef&lt;'_&gt; {
     .await
     .unwrap();</code></pre>
 <h3 id="scan"><a class="header" href="#scan">Scan</a></h3>
-<p>Like <code>DB::get</code>, <code>DB::scan</code> receives a closure that process <code>TransactionEntry</code>. The difference is that <code>DB::scan</code> receives a range of <code>Key</code>s and process all data that satisfied with the closure.</p>
+<p>Similar to <code>DB::get</code>, <code>DB::scan</code> accepts a closure that processes a <code>TransactionEntry</code>. However, instead of a single key, <code>DB::scan</code> operates over a range of keys, applying the closure to every record that falls within that range:</p>
 <pre><code class="language-rust">let lower = &quot;Alice&quot;.into();
 let upper = &quot;Bob&quot;.into();
 let stream = db
@@ -342,23 +370,23 @@ while let Some(entry) = scan.next().await.transpose().unwrap() {
     // ......
 }</code></pre>
 <h3 id="persistence"><a class="header" href="#persistence">Persistence</a></h3>
-<p>As Tonbo uses LSM(Log-Structured-Merge Tree) as the underlying data structure, some data are in the memory(mem). If you want to persist these data, you can use the <code>flush</code> method.</p>
-<p>If WAL is enabled, the data will be persisted to disk automatically. But as tonbo has buffer for WAL by default, you need to call <code>flush_wal</code> method if you want to ensure that all the data will be recovered. If you don not want to use buffer for WAL, you can disable it by setting <code>wal_buffer_size</code> to 0.</p>
+<p>Tonbo employs a Log-Structured Merge Tree (LSM) as its underlying data structure, meaning that some data may reside in memory. To persist this in-memory data, use the flush method.</p>
+<p>When Write-Ahead Logging (WAL) is enabled, data is automatically written to disk. However, since Tonbo buffers WAL data by default, you should call the <code>flush_wal</code> method to ensure all data is recovered. If you prefer not to use WAL buffering, you can disable it by setting <code>wal_buffer_size</code> to 0:</p>
 <pre><code class="language-rust">let options = DbOption::new(
     Path::from_filesystem_path(&quot;./db_path/users&quot;).unwrap(),
     &amp;UserSchema,
 ).wal_buffer_size(0);</code></pre>
-<p>If you don't want to use WAL, you can disable it by setting the <code>DbOption::disable_wal</code>. But please ensure that losing data is acceptable for you.</p>
+<p>If you don't want to use WAL, you can disable it by setting the <code>DbOption::disable_wal</code>.</p>
 <pre><code class="language-rust">let options = DbOption::new(
     Path::from_filesystem_path(&quot;./db_path/users&quot;).unwrap(),
     &amp;UserSchema,
 ).disable_wal(true);</code></pre>
 <blockquote>
 <p><strong>Note</strong>: If you disable WAL, there is nothing to do with <code>flush_wal</code>. You need to call <code>flush</code> method to persist the memory data.</p>
-<p>If you enable WAL and set <code>wal_buffer_size</code> to 0, you do not need to call <code>flush_wal</code> method, since WAL will be flushed to disk before writing.</p>
+<p>Conversely, if WAL is enabled and <code>wal_buffer_size</code> is set to 0, WAL data is flushed to disk immediately, so calling <code>flush_wal</code> is unnecessary.</p>
 </blockquote>
-<h3 id="using-in-s3"><a class="header" href="#using-in-s3">Using in S3</a></h3>
-<p>If you want to use Tonbo in S3, you can configure <code>DbOption</code> to specify which part of the data to store in S3 and which part to store in local disk. Here is an example:</p>
+<h3 id="using-with-s3"><a class="header" href="#using-with-s3">Using with S3</a></h3>
+<p>If you want to use Tonbo with S3, you can configure <code>DbOption</code> to determine which portions of your data are stored in S3 and which remain on the local disk. The example below demonstrates how to set up this configuration:</p>
 <pre><code class="language-rust">let s3_option = FsOptions::S3 {
     bucket: &quot;bucket&quot;.to_string(),
     credential: Some(AwsCredential {
@@ -376,7 +404,7 @@ let options = DbOption::new(
     &amp;UserSchema,
 ).level_path(2, &quot;l2&quot;, s3_option.clone())
 ).level_path(3, &quot;l3&quot;, s3_option);</code></pre>
-<p>In this example, the data of level 2 and level 3 will be stored in S3 and the rest of the data will be stored in local disk. If there are data in level 2 and level 3, you can find them in S3 like this:</p>
+<p>In this example, data for level 2 and level 3 will be stored in S3, while all other levels remain on the local disk. If there is data in level 2 and level 3, you can verify and access it in S3:</p>
 <pre><code class="language-bash">s3://bucket/l2/
 ├── xxx.parquet
 ├── ......
