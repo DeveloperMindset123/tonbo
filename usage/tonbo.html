@@ -324,6 +324,28 @@ async fn main() {
 <p><strong>Note</strong>: This will not guarantee the latest metadata will be uploaded to S3. If you want to ensure the latest WAL is uploaded, you can use <code>DB::flush_wal</code>. If you want to ensure the latest metadata is uploaded, you can use <code>DB::flush</code> to trigger upload manually. If you want tonbo to trigger upload more frequently, you can adjust <code>DbOption::version_log_snapshot_threshold</code> to a smaller value. The default value is 200.</p>
 </blockquote>
 <p>See more details in <a href="./conf.html#manifest-configuration">Configuration</a>.</p>
+<blockquote>
+<p><strong>Note</strong>: If you want to use S3 in WASM, please configure CORS rules for the bucket before using. Here is an example of CORS configuration:</p>
+<pre><code class="language-json">[
+    {
+        &quot;AllowedHeaders&quot;: [
+            &quot;*&quot;
+        ],
+        &quot;AllowedMethods&quot;: [
+            &quot;GET&quot;,
+            &quot;PUT&quot;,
+            &quot;DELETE&quot;,
+            &quot;HEAD&quot;
+        ],
+        &quot;AllowedOrigins&quot;: [
+            &quot;*&quot;
+        ],
+        &quot;ExposeHeaders&quot;: []
+    }
+]
+</code></pre>
+<p>For more details, please refer to <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/ManageCorsUsing.html">AWS documentation</a>.</p>
+</blockquote>
 
                     </main>
 
