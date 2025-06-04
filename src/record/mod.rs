@@ -16,6 +16,11 @@ use thiserror::Error;
 
 use crate::inmem::immutable::ArrowArrays;
 
+// Export timestamp types for easy access
+pub use key::{
+    TimestampMicrosecond, TimestampMillisecond, TimestampNanosecond, TimestampSecond, TimestampType,
+};
+
 pub trait Schema: Debug + Send + Sync {
     type Record: Record<Schema = Self>;
 

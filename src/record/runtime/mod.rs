@@ -26,6 +26,10 @@ pub enum DataType {
     Bytes,
     Float32,
     Float64,
+    TimestampSecond,
+    TimestampMillisecond,
+    TimestampMicrosecond,
+    TimestampNanosecond,
 }
 
 impl From<&ArrowDataType> for DataType {
@@ -44,6 +48,12 @@ impl From<&ArrowDataType> for DataType {
             ArrowDataType::Utf8 => DataType::String,
             ArrowDataType::Boolean => DataType::Boolean,
             ArrowDataType::Binary => DataType::Bytes,
+            ArrowDataType::Timestamp(time_unit, _) => match time_unit {
+                arrow::datatypes::TimeUnit::Second => DataType::TimestampSecond,
+                arrow::datatypes::TimeUnit::Millisecond => DataType::TimestampMillisecond,
+                arrow::datatypes::TimeUnit::Microsecond => DataType::TimestampMicrosecond,
+                arrow::datatypes::TimeUnit::Nanosecond => DataType::TimestampNanosecond,
+            },
             _ => todo!(),
         }
     }
@@ -55,4 +65,40 @@ macro_rules! cast_arc_value {
     ($value:expr, $type:ty) => {
         $value.as_ref().downcast_ref::<$type>().unwrap()
     };
+}
+
+#[cfg(test)]
+mod tests {
+    use std::time::{Duration, SystemTime};
+
+    use arrow::array::Date64Builder;
+
+    #[test]
+    fn test_data64() {
+        let mut builder = Date64Builder::with_capacity(4);
+        let now = SystemTime::now();
+        let ts = now
+            .duration_since(SystemTime::UNIX_EPOCH)
+            .unwrap()
+            .as_millis();
+        dbg!(format!("ts: {:?}", ts));
+        builder.append_value(ts as i64);
+
+        let now = SystemTime::now();
+        let ts2 = now
+            .duration_since(
+                SystemTime::UNIX_EPOCH
+                    .checked_add(Duration::new(123, 456))
+                    .unwrap(),
+            )
+            .unwrap()
+            .as_millis();
+        builder.append_value(ts2 as i64);
+        let array = builder.finish();
+        let v0 = array.value(0);
+        let v1 = array.value(1);
+        dbg!(v0, v1);
+        dbg!(array);
+        dbg!(ts, ts2);
+    }
 }

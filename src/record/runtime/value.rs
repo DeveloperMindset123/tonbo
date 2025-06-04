@@ -3,15 +3,20 @@ use std::{any::Any, fmt::Debug, hash::Hash, sync::Arc};
 use arrow::{
     array::{
         BooleanArray, Float32Array, Float64Array, GenericBinaryArray, Int16Array, Int32Array,
-        Int64Array, Int8Array, StringArray, UInt16Array, UInt32Array, UInt64Array, UInt8Array,
+        Int64Array, Int8Array, StringArray, TimestampMicrosecondArray, TimestampMillisecondArray,
+        TimestampNanosecondArray, TimestampSecondArray, UInt16Array, UInt32Array, UInt64Array,
+        UInt8Array,
     },
-    datatypes::{DataType as ArrowDataType, Field},
+    datatypes::{DataType as ArrowDataType, Field, TimeUnit},
 };
 use fusio::{SeqRead, Write};
 use fusio_log::{Decode, DecodeError, Encode};
 
 use super::DataType;
-use crate::record::{Key, KeyRef, F32, F64};
+use crate::record::{
+    Key, KeyRef, TimestampMicrosecond, TimestampMillisecond, TimestampNanosecond, TimestampSecond,
+    F32, F64,
+};
 
 #[derive(Debug, Clone)]
 pub struct ValueDesc {
@@ -44,6 +49,18 @@ impl ValueDesc {
             DataType::String => ArrowDataType::Utf8,
             DataType::Boolean => ArrowDataType::Boolean,
             DataType::Bytes => ArrowDataType::Binary,
+            DataType::TimestampSecond => {
+                ArrowDataType::Timestamp(TimeUnit::Second, Some("+00:00".into()))
+            }
+            DataType::TimestampMillisecond => {
+                ArrowDataType::Timestamp(TimeUnit::Millisecond, Some("+00:00".into()))
+            }
+            DataType::TimestampMicrosecond => {
+                ArrowDataType::Timestamp(TimeUnit::Microsecond, Some("+00:00".into()))
+            }
+            DataType::TimestampNanosecond => {
+                ArrowDataType::Timestamp(TimeUnit::Nanosecond, Some("+00:00".into()))
+            }
         };
         Field::new(&self.name, arrow_type, self.is_nullable)
     }
@@ -109,6 +126,30 @@ impl Value {
                 datatype,
                 name,
                 Arc::<Option<Vec<u8>>>::new(None),
+                is_nullable,
+            ),
+            DataType::TimestampSecond => Self::new(
+                datatype,
+                name,
+                Arc::<Option<TimestampSecond>>::new(None),
+                is_nullable,
+            ),
+            DataType::TimestampMillisecond => Self::new(
+                datatype,
+                name,
+                Arc::<Option<TimestampMillisecond>>::new(None),
+                is_nullable,
+            ),
+            DataType::TimestampMicrosecond => Self::new(
+                datatype,
+                name,
+                Arc::<Option<TimestampMicrosecond>>::new(None),
+                is_nullable,
+            ),
+            DataType::TimestampNanosecond => Self::new(
+                datatype,
+                name,
+                Arc::<Option<TimestampNanosecond>>::new(None),
                 is_nullable,
             ),
         }
@@ -265,6 +306,34 @@ macro_rules! implement_key_col {
                             .downcast_ref::<Vec<u8>>()
                             .expect("unexpected datatype, expected bytes"),
                     )),
+                    DataType::TimestampSecond => Arc::new(TimestampSecondArray::new_scalar(
+                        (*self
+                            .value
+                            .as_ref()
+                            .downcast_ref::<TimestampSecond>()
+                            .expect("unexpected datatype, expected TimestampSecond")).into(),
+                    )),
+                    DataType::TimestampMillisecond => Arc::new(TimestampMillisecondArray::new_scalar(
+                        (*self
+                            .value
+                            .as_ref()
+                            .downcast_ref::<TimestampMillisecond>()
+                            .expect("unexpected datatype, expected TimestampMillisecond")).into(),
+                    )),
+                    DataType::TimestampMicrosecond => Arc::new(TimestampMicrosecondArray::new_scalar(
+                        (*self
+                            .value
+                            .as_ref()
+                            .downcast_ref::<TimestampMicrosecond>()
+                            .expect("unexpected datatype, expected TimestampMicrosecond")).into(),
+                    )),
+                    DataType::TimestampNanosecond => Arc::new(TimestampNanosecondArray::new_scalar(
+                        (*self
+                            .value
+                            .as_ref()
+                            .downcast_ref::<TimestampNanosecond>()
+                            .expect("unexpected datatype, expected TimestampNanosecond")).into(),
+                    )),
                 }
             }
         }
@@ -390,6 +459,10 @@ impl Value {
             DataType::Bytes => 10,
             DataType::Float32 => 11,
             DataType::Float64 => 12,
+            DataType::TimestampSecond => 13,
+            DataType::TimestampMillisecond => 14,
+            DataType::TimestampMicrosecond => 15,
+            DataType::TimestampNanosecond => 16,
         }
     }
 
@@ -408,6 +481,10 @@ impl Value {
             10 => DataType::Bytes,
             11 => DataType::Float32,
             12 => DataType::Float64,
+            13 => DataType::TimestampSecond,
+            14 => DataType::TimestampMillisecond,
+            15 => DataType::TimestampMicrosecond,
+            16 => DataType::TimestampNanosecond,
             _ => panic!("invalid datatype tag"),
         }
     }
@@ -429,6 +506,26 @@ impl From<&ValueDesc> for Field {
             DataType::String => Field::new(&col.name, ArrowDataType::Utf8, col.is_nullable),
             DataType::Boolean => Field::new(&col.name, ArrowDataType::Boolean, col.is_nullable),
             DataType::Bytes => Field::new(&col.name, ArrowDataType::Binary, col.is_nullable),
+            DataType::TimestampSecond => Field::new(
+                &col.name,
+                ArrowDataType::Timestamp(TimeUnit::Second, Some("+00:00".into())),
+                col.is_nullable,
+            ),
+            DataType::TimestampMillisecond => Field::new(
+                &col.name,
+                ArrowDataType::Timestamp(TimeUnit::Millisecond, Some("+00:00".into())),
+                col.is_nullable,
+            ),
+            DataType::TimestampMicrosecond => Field::new(
+                &col.name,
+                ArrowDataType::Timestamp(TimeUnit::Microsecond, Some("+00:00".into())),
+                col.is_nullable,
+            ),
+            DataType::TimestampNanosecond => Field::new(
+                &col.name,
+                ArrowDataType::Timestamp(TimeUnit::Nanosecond, Some("+00:00".into())),
+                col.is_nullable,
+            ),
         }
     }
 }
@@ -449,7 +546,11 @@ macro_rules! for_datatype {
                 { F64, Float64 },
                 { String, String },
                 { bool, Boolean },
-                { Vec<u8>, Bytes }
+                { Vec<u8>, Bytes },
+                { TimestampSecond, TimestampSecond },
+                { TimestampMillisecond, TimestampMillisecond },
+                { TimestampMicrosecond, TimestampMicrosecond },
+                { TimestampNanosecond, TimestampNanosecond }
         }
     };
 }
@@ -458,6 +559,7 @@ implement_key_col!(
     { u8, UInt8, UInt8Array }, { u16, UInt16, UInt16Array }, { u32, UInt32, UInt32Array }, { u64, UInt64, UInt64Array },
     { i8, Int8, Int8Array }, { i16, Int16, Int16Array }, { i32, Int32, Int32Array }, { i64, Int64, Int64Array }
     // { F32, Float32, Float32Array }, { F64, Float64, Float64Array }
+    // Timestamp types are handled separately in the to_arrow_datum method like Float types
 );
 for_datatype! { implement_col }
 for_datatype! { implement_decode_col }

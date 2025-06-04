@@ -1,8 +1,9 @@
 use std::{hash::Hash, ops::Deref, sync::Arc};
 
 use arrow::array::{
-    Datum, Float32Array, Float64Array, Int16Array, Int32Array, Int64Array, Int8Array, UInt16Array,
-    UInt32Array, UInt64Array, UInt8Array,
+    Datum, Float32Array, Float64Array, Int16Array, Int32Array, Int64Array, Int8Array,
+    TimestampMicrosecondArray, TimestampMillisecondArray, TimestampNanosecondArray,
+    TimestampSecondArray, UInt16Array, UInt32Array, UInt64Array, UInt8Array,
 };
 use fusio::{SeqRead, Write};
 use fusio_log::{Decode, Encode};
@@ -48,6 +49,154 @@ pub struct FloatType<T>(pub T);
 
 pub type F32 = FloatType<f32>;
 pub type F64 = FloatType<f64>;
+
+// Timestamp types with different time units
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub struct TimestampType<const UNIT: u8>(pub i64);
+
+pub enum TimeUnit {
+    Second,
+    Millisecond,
+    Microsecond,
+}
+
+pub type TimestampSecond = TimestampType<0>; // Seconds since Unix epoch
+pub type TimestampMillisecond = TimestampType<1>; // Milliseconds since Unix epoch
+pub type TimestampMicrosecond = TimestampType<2>; // Microseconds since Unix epoch
+pub type TimestampNanosecond = TimestampType<3>; // Nanoseconds since Unix epoch
+
+impl<const UNIT: u8> TimestampType<UNIT> {
+    pub fn new(value: i64) -> Self {
+        Self(value)
+    }
+
+    pub fn value(&self) -> i64 {
+        self.0
+    }
+}
+
+impl<const UNIT: u8> From<i64> for TimestampType<UNIT> {
+    fn from(value: i64) -> Self {
+        Self(value)
+    }
+}
+
+impl<const UNIT: u8> From<TimestampType<UNIT>> for i64 {
+    fn from(value: TimestampType<UNIT>) -> Self {
+        value.0
+    }
+}
+
+impl<const UNIT: u8> Deref for TimestampType<UNIT> {
+    type Target = i64;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+// Encode/Decode implementations for timestamps
+impl<const UNIT: u8> Encode for TimestampType<UNIT> {
+    type Error = fusio::Error;
+
+    async fn encode<W: Write>(&self, writer: &mut W) -> Result<(), Self::Error> {
+        self.0.encode(writer).await
+    }
+
+    fn size(&self) -> usize {
+        self.0.size()
+    }
+}
+
+impl<const UNIT: u8> Decode for TimestampType<UNIT> {
+    type Error = fusio::Error;
+
+    async fn decode<R: SeqRead>(reader: &mut R) -> Result<Self, Self::Error> {
+        let value = i64::decode(reader).await?;
+        Ok(Self(value))
+    }
+}
+
+// Key implementations for timestamps
+impl Key for TimestampSecond {
+    type Ref<'r> = TimestampSecond;
+
+    fn as_key_ref(&self) -> Self::Ref<'_> {
+        *self
+    }
+
+    fn to_arrow_datum(&self) -> Arc<dyn Datum> {
+        Arc::new(TimestampSecondArray::new_scalar(self.0))
+    }
+}
+
+impl<'a> KeyRef<'a> for TimestampSecond {
+    type Key = TimestampSecond;
+
+    fn to_key(self) -> Self::Key {
+        self
+    }
+}
+
+impl Key for TimestampMillisecond {
+    type Ref<'r> = TimestampMillisecond;
+
+    fn as_key_ref(&self) -> Self::Ref<'_> {
+        *self
+    }
+
+    fn to_arrow_datum(&self) -> Arc<dyn Datum> {
+        Arc::new(TimestampMillisecondArray::new_scalar(self.0))
+    }
+}
+
+impl<'a> KeyRef<'a> for TimestampMillisecond {
+    type Key = TimestampMillisecond;
+
+    fn to_key(self) -> Self::Key {
+        self
+    }
+}
+
+impl Key for TimestampMicrosecond {
+    type Ref<'r> = TimestampMicrosecond;
+
+    fn as_key_ref(&self) -> Self::Ref<'_> {
+        *self
+    }
+
+    fn to_arrow_datum(&self) -> Arc<dyn Datum> {
+        Arc::new(TimestampMicrosecondArray::new_scalar(self.0))
+    }
+}
+
+impl<'a> KeyRef<'a> for TimestampMicrosecond {
+    type Key = TimestampMicrosecond;
+
+    fn to_key(self) -> Self::Key {
+        self
+    }
+}
+
+impl Key for TimestampNanosecond {
+    type Ref<'r> = TimestampNanosecond;
+
+    fn as_key_ref(&self) -> Self::Ref<'_> {
+        *self
+    }
+
+    fn to_arrow_datum(&self) -> Arc<dyn Datum> {
+        Arc::new(TimestampNanosecondArray::new_scalar(self.0))
+    }
+}
+
+impl<'a> KeyRef<'a> for TimestampNanosecond {
+    type Key = TimestampNanosecond;
+
+    fn to_key(self) -> Self::Key {
+        self
+    }
+}
 
 #[macro_export]
 macro_rules! implement_float_encode_decode {

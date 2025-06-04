@@ -4,7 +4,8 @@ use arrow::{
     array::{Array, ArrayRef, ArrowPrimitiveType, AsArray},
     datatypes::{
         Float32Type, Float64Type, Int16Type, Int32Type, Int64Type, Int8Type, Schema as ArrowSchema,
-        UInt16Type, UInt32Type, UInt64Type, UInt8Type,
+        TimestampMicrosecondType, TimestampMillisecondType, TimestampNanosecondType,
+        TimestampSecondType, UInt16Type, UInt32Type, UInt64Type, UInt8Type,
     },
 };
 use fusio::Write;
@@ -12,9 +13,11 @@ use fusio_log::Encode;
 
 use super::{DataType, DynRecord, Value};
 use crate::{
+    cast_arc_value,
     magic::USER_COLUMN_OFFSET,
     record::{
-        option::OptionRecordRef, Key, Record, RecordEncodeError, RecordRef, Schema, F32, F64,
+        option::OptionRecordRef, Key, Record, RecordEncodeError, RecordRef, Schema,
+        TimestampMicrosecond, TimestampMillisecond, TimestampNanosecond, TimestampSecond, F32, F64,
     },
 };
 
@@ -189,6 +192,54 @@ impl<'r> RecordRef<'r> for DynRecordRef<'r> {
                         Arc::new(value) as Arc<dyn Any + Send + Sync>
                     }
                 }
+                DataType::TimestampSecond => {
+                    let v = col.as_primitive::<TimestampSecondType>();
+
+                    if primary_index == idx - 2 {
+                        Arc::new(TimestampSecond::from(v.value(offset)))
+                            as Arc<dyn Any + Send + Sync>
+                    } else {
+                        let value = (!v.is_null(offset) && projection_mask.leaf_included(idx))
+                            .then_some(TimestampSecond::from(v.value(offset)));
+                        Arc::new(value) as Arc<dyn Any + Send + Sync>
+                    }
+                }
+                DataType::TimestampMillisecond => {
+                    let v = col.as_primitive::<TimestampMillisecondType>();
+
+                    if primary_index == idx - 2 {
+                        Arc::new(TimestampMillisecond::from(v.value(offset)))
+                            as Arc<dyn Any + Send + Sync>
+                    } else {
+                        let value = (!v.is_null(offset) && projection_mask.leaf_included(idx))
+                            .then_some(TimestampMillisecond::from(v.value(offset)));
+                        Arc::new(value) as Arc<dyn Any + Send + Sync>
+                    }
+                }
+                DataType::TimestampMicrosecond => {
+                    let v = col.as_primitive::<TimestampMicrosecondType>();
+
+                    if primary_index == idx - 2 {
+                        Arc::new(TimestampMicrosecond::from(v.value(offset)))
+                            as Arc<dyn Any + Send + Sync>
+                    } else {
+                        let value = (!v.is_null(offset) && projection_mask.leaf_included(idx))
+                            .then_some(TimestampMicrosecond::from(v.value(offset)));
+                        Arc::new(value) as Arc<dyn Any + Send + Sync>
+                    }
+                }
+                DataType::TimestampNanosecond => {
+                    let v = col.as_primitive::<TimestampNanosecondType>();
+
+                    if primary_index == idx - 2 {
+                        Arc::new(TimestampNanosecond::from(v.value(offset)))
+                            as Arc<dyn Any + Send + Sync>
+                    } else {
+                        let value = (!v.is_null(offset) && projection_mask.leaf_included(idx))
+                            .then_some(TimestampNanosecond::from(v.value(offset)));
+                        Arc::new(value) as Arc<dyn Any + Send + Sync>
+                    }
+                }
                 DataType::String => {
                     let v = col.as_string::<i32>();
 
@@ -253,6 +304,18 @@ impl<'r> RecordRef<'r> for DynRecordRef<'r> {
                     DataType::Int64 => col.value = Arc::<Option<i64>>::new(None),
                     DataType::Float32 => col.value = Arc::<Option<F32>>::new(None),
                     DataType::Float64 => col.value = Arc::<Option<F64>>::new(None),
+                    DataType::TimestampSecond => {
+                        col.value = Arc::<Option<TimestampSecond>>::new(None)
+                    }
+                    DataType::TimestampMillisecond => {
+                        col.value = Arc::<Option<TimestampMillisecond>>::new(None)
+                    }
+                    DataType::TimestampMicrosecond => {
+                        col.value = Arc::<Option<TimestampMicrosecond>>::new(None)
+                    }
+                    DataType::TimestampNanosecond => {
+                        col.value = Arc::<Option<TimestampNanosecond>>::new(None)
+                    }
                     DataType::String => col.value = Arc::<Option<String>>::new(None),
                     DataType::Boolean => col.value = Arc::<Option<bool>>::new(None),
                     DataType::Bytes => col.value = Arc::<Option<Vec<u8>>>::new(None),

@@ -6,7 +6,10 @@ use fusio_log::{Decode, Encode};
 use super::{schema::DynSchema, DataType, DynRecordRef, Value};
 use crate::{
     cast_arc_value,
-    record::{Record, RecordDecodeError, F32, F64},
+    record::{
+        Record, RecordDecodeError, TimestampMicrosecond, TimestampMillisecond, TimestampNanosecond,
+        TimestampSecond, F32, F64,
+    },
 };
 
 #[derive(Debug)]
@@ -59,6 +62,19 @@ impl Decode for DynRecord {
                     DataType::Bytes => {
                         Arc::new(cast_arc_value!(col.value, Option<Vec<u8>>).clone().unwrap())
                     }
+                    DataType::TimestampSecond => {
+                        Arc::new(cast_arc_value!(col.value, Option<TimestampSecond>).unwrap())
+                    }
+                    DataType::TimestampMillisecond => {
+                        Arc::new(cast_arc_value!(col.value, Option<TimestampMillisecond>).unwrap())
+                    }
+                    DataType::TimestampMicrosecond => {
+                        Arc::new(cast_arc_value!(col.value, Option<TimestampMicrosecond>).unwrap())
+                    }
+                    DataType::TimestampNanosecond => {
+                        Arc::new(cast_arc_value!(col.value, Option<TimestampNanosecond>).unwrap())
+                    }
+                    DataType::Int32 => Arc::new(cast_arc_value!(col.value, Option<i32>).unwrap()),
                 };
             }
             values.push(col);
@@ -101,6 +117,18 @@ impl Record for DynRecord {
                     DataType::Bytes => {
                         Arc::new(Some(cast_arc_value!(col.value, Vec<u8>).to_owned()))
                     }
+                    DataType::TimestampSecond => {
+                        Arc::new(Some(*cast_arc_value!(col.value, TimestampSecond)))
+                    }
+                    DataType::TimestampMillisecond => {
+                        Arc::new(Some(*cast_arc_value!(col.value, TimestampMillisecond)))
+                    }
+                    DataType::TimestampMicrosecond => {
+                        Arc::new(Some(*cast_arc_value!(col.value, TimestampMicrosecond)))
+                    }
+                    DataType::TimestampNanosecond => {
+                        Arc::new(Some(*cast_arc_value!(col.value, TimestampNanosecond)))
+                    }
                 };
             }
 
@@ -139,6 +167,15 @@ impl Record for DynRecord {
 ///     ("baz", UInt64, true, 1_u64),
 ///     0
 /// );
+///
+/// // Example with timestamp types:
+/// use tonbo::{TimestampSecond, TimestampMillisecond};
+/// let timestamp_record = dyn_record!(
+///     ("created_at", TimestampSecond, false, TimestampSecond::from(1609459200_i64)), // 2021-01-01 00:00:00 UTC
+///     ("updated_at", TimestampMillisecond, true, TimestampMillisecond::from(1609459200000_i64)), // 2021-01-01 00:00:00.000 UTC
+///     ("id", UInt64, false, 123_u64),
+///     2
+/// );
 /// ```
 #[macro_export]
 macro_rules! dyn_record {
@@ -168,7 +205,7 @@ pub(crate) mod test {
     use super::{DynRecord, DynSchema};
     use crate::{
         dyn_schema,
-        record::{F32, F64},
+        record::{TimestampMillisecond, TimestampSecond, F32, F64},
     };
 
     #[allow(unused)]
@@ -184,6 +221,8 @@ pub(crate) mod test {
             ("bytes", Bytes, true),
             ("grade", Float32, false),
             ("price", Float64, true),
+            ("created_at", TimestampSecond, false),
+            ("updated_at", TimestampMillisecond, true),
             0
         )
     }
@@ -203,6 +242,20 @@ pub(crate) mod test {
                 ("bytes", Bytes, true, Some(i.to_le_bytes().to_vec())),
                 ("grade", Float32, false, F32::from(i as f32 * 1.11)),
                 ("price", Float64, true, Some(F64::from(i as f64 * 1.01))),
+                (
+                    "created_at",
+                    TimestampSecond,
+                    false,
+                    TimestampSecond::from(1609459200_i64 + i as i64)
+                ),
+                (
+                    "updated_at",
+                    TimestampMillisecond,
+                    true,
+                    Some(TimestampMillisecond::from(
+                        1609459200000_i64 + i as i64 * 1000
+                    ))
+                ),
                 0
             );
             if i >= 45 {
