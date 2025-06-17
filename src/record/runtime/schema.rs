@@ -3,20 +3,30 @@ use std::{collections::HashMap, sync::Arc};
 use arrow::datatypes::{DataType, Field, Schema as ArrowSchema};
 use parquet::{format::SortingColumn, schema::types::ColumnPath};
 
-use super::{array::DynRecordImmutableArrays, DynRecord, Value, ValueDesc};
-use crate::{magic, record::Schema};
+use super::{array::DynRecordImmutableArrays, DynRecord, ValueDesc};
+use crate::{
+    magic,
+    record::{PrimaryKey, Schema},
+};
 
 #[derive(Debug)]
 pub struct DynSchema {
     schema: Vec<ValueDesc>,
-    primary_index: usize,
+    primary_index: Vec<usize>,
     arrow_schema: Arc<ArrowSchema>,
 }
 
 impl DynSchema {
-    pub fn new(schema: Vec<ValueDesc>, primary_index: usize) -> Self {
+    pub fn new(schema: Vec<ValueDesc>, primary_index: Vec<usize>) -> Self {
+        let primary_key = primary_index
+            .iter()
+            .map(|v| v.to_string())
+            .collect::<Vec<String>>()
+            .join(",");
+
         let mut metadata = HashMap::new();
-        metadata.insert("primary_key_index".to_string(), primary_index.to_string());
+        metadata.insert("primary_key_index".to_string(), primary_key);
+        // metadata.insert("primary_key_index".to_string(), primary_index.to_string());
         let arrow_schema = Arc::new(ArrowSchema::new_with_metadata(
             [
                 Field::new("_null", DataType::Boolean, false),
@@ -40,27 +50,29 @@ impl Schema for DynSchema {
 
     type Columns = DynRecordImmutableArrays;
 
-    type Key = Value;
+    type Key = PrimaryKey;
 
     fn arrow_schema(&self) -> &Arc<ArrowSchema> {
         &self.arrow_schema
     }
 
-    fn primary_key_index(&self) -> usize {
-        self.primary_index + 2
+    fn primary_key_index(&self) -> Vec<usize> {
+        self.primary_index
+            .iter()
+            .map(|idx| idx + 2)
+            .collect::<Vec<usize>>()
     }
 
     fn primary_key_path(&self) -> (ColumnPath, Vec<SortingColumn>) {
-        (
-            ColumnPath::new(vec![
-                magic::TS.to_string(),
-                self.schema[self.primary_index].name.clone(),
-            ]),
-            vec![
-                SortingColumn::new(1_i32, true, true),
-                SortingColumn::new(self.primary_key_index() as i32, false, true),
-            ],
-        )
+        let mut column_path = Vec::with_capacity(self.primary_index.len() + 1);
+        let mut sorting_column = Vec::with_capacity(self.primary_index.len() + 1);
+        column_path.push(magic::TS.to_string());
+        sorting_column.push(SortingColumn::new(1_i32, true, true));
+        for idx in self.primary_index.iter() {
+            column_path.push(self.schema[*idx].name.clone());
+            sorting_column.push(SortingColumn::new(*idx as i32 + 2, false, true));
+        }
+        (ColumnPath::new(column_path), sorting_column)
     }
 }
 
@@ -95,7 +107,7 @@ macro_rules! dyn_schema {
                         $crate::record::ValueDesc::new($name.into(), $crate::record::DataType::$type, $nullable),
                     )*
                 ],
-                $primary,
+                vec![$primary],
             )
         }
     }

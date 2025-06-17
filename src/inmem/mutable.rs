@@ -229,7 +229,10 @@ mod tests {
     use super::MutableMemTable;
     use crate::{
         inmem::immutable::tests::TestSchema,
-        record::{test::StringSchema, DataType, DynRecord, DynSchema, Record, Value, ValueDesc},
+        record::{
+            test::StringSchema, DataType, DynRecord, DynSchema, PrimaryKey, Record, Value,
+            ValueDesc,
+        },
         tests::{Test, TestRef},
         timestamp::Ts,
         trigger::TriggerFactory,
@@ -392,7 +395,7 @@ mod tests {
                 ValueDesc::new("age".to_string(), DataType::Int8, false),
                 ValueDesc::new("height".to_string(), DataType::Int16, true),
             ],
-            0,
+            vec![0],
         );
         let option = DbOption::new(
             Path::from_filesystem_path(temp_dir.path()).unwrap(),
@@ -422,7 +425,7 @@ mod tests {
                             true,
                         ),
                     ],
-                    0,
+                    vec![0],
                 ),
                 0_u32.into(),
             )
@@ -435,7 +438,12 @@ mod tests {
             assert_eq!(
                 entry.key(),
                 &Ts::new(
-                    Value::new(DataType::Int8, "age".to_string(), Arc::new(1_i8), false),
+                    PrimaryKey::new(vec![Value::new(
+                        DataType::Int8,
+                        "age".to_string(),
+                        Arc::new(1_i8),
+                        false
+                    )]),
                     0_u32.into()
                 )
             );

@@ -52,7 +52,7 @@ mod tests {
 
         assert_eq!(user.key(), "cat");
         assert_eq!(user.size(), 24);
-        assert_eq!(UserSchema {}.primary_key_index(), 4);
+        assert_eq!(UserSchema {}.primary_key_index(), vec![4]);
         assert_eq!(
             UserSchema {}.primary_key_path(),
             (

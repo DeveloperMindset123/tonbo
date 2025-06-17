@@ -12,12 +12,12 @@ use crate::{
 #[derive(Debug)]
 pub struct DynRecord {
     values: Vec<Value>,
-    primary_index: usize,
+    primary_index: Vec<usize>,
 }
 
 #[allow(unused)]
 impl DynRecord {
-    pub fn new(values: Vec<Value>, primary_index: usize) -> Self {
+    pub fn new(values: Vec<Value>, primary_index: Vec<usize>) -> Self {
         Self {
             values,
             primary_index,
@@ -33,12 +33,18 @@ impl Decode for DynRecord {
         R: SeqRead,
     {
         let len = u32::decode(reader).await? as usize;
-        let primary_index = u32::decode(reader).await? as usize;
+        let primary_index_len = u32::decode(reader).await? as usize;
+        let mut primary_index = Vec::with_capacity(primary_index_len);
+        for _ in 0..primary_index_len {
+            let idx = u32::decode(reader).await? as usize;
+            primary_index.push(idx);
+        }
+        // let primary_index = u32::decode(reader).await? as usize;
         let mut values = vec![];
         // keep invariant for record: nullable --> Some(v); non-nullable --> v
         for i in 0..len {
             let mut col = Value::decode(reader).await?;
-            if i != primary_index && !col.is_nullable() {
+            if !primary_index.contains(&i) && !col.is_nullable() {
                 col.value = match col.datatype() {
                     DataType::UInt8 => Arc::new(cast_arc_value!(col.value, Option<u8>).unwrap()),
                     DataType::UInt16 => Arc::new(cast_arc_value!(col.value, Option<u16>).unwrap()),
@@ -82,7 +88,7 @@ impl Record for DynRecord {
             let datatype = col.datatype();
             let is_nullable = col.is_nullable();
             let mut value = col.value.clone();
-            if idx != self.primary_index && !is_nullable {
+            if !self.primary_index.contains(&idx) && !is_nullable {
                 value = match datatype {
                     DataType::UInt8 => Arc::new(Some(*cast_arc_value!(col.value, u8))),
                     DataType::UInt16 => Arc::new(Some(*cast_arc_value!(col.value, u16))),
@@ -111,7 +117,7 @@ impl Record for DynRecord {
                 is_nullable,
             ));
         }
-        DynRecordRef::new(columns, self.primary_index)
+        DynRecordRef::new(columns, self.primary_index.clone())
     }
 
     fn size(&self) -> usize {
@@ -155,7 +161,7 @@ macro_rules! dyn_record {
                         ),
                     )*
                 ],
-                $primary,
+                vec![$primary],
             )
         }
     }

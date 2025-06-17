@@ -129,11 +129,13 @@ impl ArrowArrays for DynRecordImmutableArrays {
 
         let schema = self.record_batch.schema();
         let metadata = schema.metadata();
-        let primary_key_index = metadata
-            .get("primary_key_index")
-            .unwrap()
-            .parse::<usize>()
-            .unwrap();
+        let primary_key_index = metadata.get("primary_key_index").unwrap();
+        // .parse::<usize>()
+        // .unwrap();
+        let primary_key_index = primary_key_index
+            .split(",")
+            .map(|v| v.parse::<usize>().unwrap())
+            .collect::<Vec<usize>>();
         let mut columns = vec![];
         for (idx, col) in self.columns.iter().enumerate() {
             if projection_mask.leaf_included(idx + USER_COLUMN_OFFSET) {
@@ -143,7 +145,7 @@ impl ArrowArrays for DynRecordImmutableArrays {
                 let value: Arc<dyn Any + Send + Sync> = match &datatype {
                     DataType::UInt8 => {
                         let v = Self::primitive_value::<UInt8Type>(col, offset);
-                        if primary_key_index == idx {
+                        if primary_key_index.contains(&idx) {
                             Arc::new(v)
                         } else {
                             Arc::new(Some(v))
@@ -151,7 +153,7 @@ impl ArrowArrays for DynRecordImmutableArrays {
                     }
                     DataType::UInt16 => {
                         let v = Self::primitive_value::<UInt16Type>(col, offset);
-                        if primary_key_index == idx {
+                        if primary_key_index.contains(&idx) {
                             Arc::new(v)
                         } else {
                             Arc::new(Some(v))
@@ -159,7 +161,7 @@ impl ArrowArrays for DynRecordImmutableArrays {
                     }
                     DataType::UInt32 => {
                         let v = Self::primitive_value::<UInt32Type>(col, offset);
-                        if primary_key_index == idx {
+                        if primary_key_index.contains(&idx) {
                             Arc::new(v)
                         } else {
                             Arc::new(Some(v))
@@ -167,7 +169,7 @@ impl ArrowArrays for DynRecordImmutableArrays {
                     }
                     DataType::UInt64 => {
                         let v = Self::primitive_value::<UInt64Type>(col, offset);
-                        if primary_key_index == idx {
+                        if primary_key_index.contains(&idx) {
                             Arc::new(v)
                         } else {
                             Arc::new(Some(v))
@@ -175,7 +177,7 @@ impl ArrowArrays for DynRecordImmutableArrays {
                     }
                     DataType::Int8 => {
                         let v = Self::primitive_value::<Int8Type>(col, offset);
-                        if primary_key_index == idx {
+                        if primary_key_index.contains(&idx) {
                             Arc::new(v)
                         } else {
                             Arc::new(Some(v))
@@ -183,7 +185,7 @@ impl ArrowArrays for DynRecordImmutableArrays {
                     }
                     DataType::Int16 => {
                         let v = Self::primitive_value::<Int16Type>(col, offset);
-                        if primary_key_index == idx {
+                        if primary_key_index.contains(&idx) {
                             Arc::new(v)
                         } else {
                             Arc::new(Some(v))
@@ -191,7 +193,7 @@ impl ArrowArrays for DynRecordImmutableArrays {
                     }
                     DataType::Int32 => {
                         let v = Self::primitive_value::<Int32Type>(col, offset);
-                        if primary_key_index == idx {
+                        if primary_key_index.contains(&idx) {
                             Arc::new(v)
                         } else {
                             Arc::new(Some(v))
@@ -199,7 +201,7 @@ impl ArrowArrays for DynRecordImmutableArrays {
                     }
                     DataType::Int64 => {
                         let v = Self::primitive_value::<Int64Type>(col, offset);
-                        if primary_key_index == idx {
+                        if primary_key_index.contains(&idx) {
                             Arc::new(v)
                         } else {
                             Arc::new(Some(v))
@@ -207,7 +209,7 @@ impl ArrowArrays for DynRecordImmutableArrays {
                     }
                     DataType::Float32 => {
                         let v = Self::primitive_value::<Float32Type>(col, offset);
-                        if primary_key_index == idx {
+                        if primary_key_index.contains(&idx) {
                             Arc::new(F32::from(v))
                         } else {
                             Arc::new(Some(F32::from(v)))
@@ -215,7 +217,7 @@ impl ArrowArrays for DynRecordImmutableArrays {
                     }
                     DataType::Float64 => {
                         let v = Self::primitive_value::<Float64Type>(col, offset);
-                        if primary_key_index == idx {
+                        if primary_key_index.contains(&idx) {
                             Arc::new(F64::from(v))
                         } else {
                             Arc::new(Some(F64::from(v)))
@@ -225,7 +227,7 @@ impl ArrowArrays for DynRecordImmutableArrays {
                         let v = cast_arc_value!(col.value, StringArray)
                             .value(offset)
                             .to_owned();
-                        if primary_key_index == idx {
+                        if primary_key_index.contains(&idx) {
                             Arc::new(v)
                         } else {
                             Arc::new(Some(v))
@@ -233,7 +235,7 @@ impl ArrowArrays for DynRecordImmutableArrays {
                     }
                     DataType::Boolean => {
                         let v = cast_arc_value!(col.value, BooleanArray).value(offset);
-                        if primary_key_index == idx {
+                        if primary_key_index.contains(&idx) {
                             Arc::new(v)
                         } else {
                             Arc::new(Some(v))
@@ -243,7 +245,7 @@ impl ArrowArrays for DynRecordImmutableArrays {
                         let v = cast_arc_value!(col.value, GenericBinaryArray<i32>)
                             .value(offset)
                             .to_owned();
-                        if primary_key_index == idx {
+                        if primary_key_index.contains(&idx) {
                             Arc::new(v)
                         } else {
                             Arc::new(Some(v))
@@ -291,10 +293,15 @@ impl Builder<DynRecordImmutableArrays> for DynRecordBuilder {
         let metadata = self.schema.metadata();
         let primary_key_index = metadata
             .get("primary_key_index")
-            .unwrap()
-            .parse::<usize>()
+            // .unwrap()
+            // .parse::<usize>()
             .unwrap();
-        self.push_primary_key(key, primary_key_index);
+
+        let primary_key_index = primary_key_index
+            .split(",")
+            .map(|v| v.parse::<usize>().unwrap())
+            .collect::<Vec<usize>>();
+        // self.push_primary_key(key, primary_key_index);
         match row {
             Some(record_ref) => {
                 for (idx, (builder, col)) in self
@@ -303,7 +310,9 @@ impl Builder<DynRecordImmutableArrays> for DynRecordBuilder {
                     .zip(record_ref.columns.iter())
                     .enumerate()
                 {
-                    if idx == primary_key_index {
+                    if primary_key_index.contains(&idx) {
+                        // self.push_primary_key(&col, primary_key_index[idx]);
+                        Self::push_primary_key(builder, col);
                         continue;
                     }
                     let datatype = col.datatype();
@@ -443,7 +452,7 @@ impl Builder<DynRecordImmutableArrays> for DynRecordBuilder {
                     .zip(self.datatypes.iter_mut())
                     .enumerate()
                 {
-                    if idx == primary_key_index {
+                    if primary_key_index.contains(&idx) {
                         continue;
                     }
                     match datatype {
@@ -769,13 +778,15 @@ impl Builder<DynRecordImmutableArrays> for DynRecordBuilder {
 
 impl DynRecordBuilder {
     fn push_primary_key(
-        &mut self,
-        key: Ts<<<<DynRecord as Record>::Schema as Schema>::Key as Key>::Ref<'_>>,
-        primary_key_index: usize,
+        builder: &mut Box<dyn ArrayBuilder + Send + Sync>,
+        col: &Value,
+        // key: Ts<<<<DynRecord as Record>::Schema as Schema>::Key as Key>::Ref<'_>>,
+        // primary_key_index: usize,
     ) {
-        let builder = self.builders.get_mut(primary_key_index).unwrap();
-        let datatype = self.datatypes.get_mut(primary_key_index).unwrap();
-        let col = key.value;
+        // let builder = self.builders.get_mut(primary_key_index).unwrap();
+        // let datatype = self.datatypes.get_mut(primary_key_index).unwrap();
+        let datatype = col.datatype();
+        // let col = key.value;
         match datatype {
             DataType::UInt8 => {
                 Self::as_builder_mut::<PrimitiveBuilder<UInt8Type>>(builder.as_mut())

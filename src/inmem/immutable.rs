@@ -256,8 +256,8 @@ pub(crate) mod tests {
             &SCHEMA
         }
 
-        fn primary_key_index(&self) -> usize {
-            2
+        fn primary_key_index(&self) -> Vec<usize> {
+            vec![2]
         }
 
         fn primary_key_path(

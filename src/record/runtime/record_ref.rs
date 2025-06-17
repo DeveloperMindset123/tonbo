@@ -14,7 +14,8 @@ use super::{DataType, DynRecord, Value};
 use crate::{
     magic::USER_COLUMN_OFFSET,
     record::{
-        option::OptionRecordRef, Key, Record, RecordEncodeError, RecordRef, Schema, F32, F64,
+        option::OptionRecordRef, Key, PrimaryKey, Record, RecordEncodeError, RecordRef, Schema,
+        F32, F64,
     },
 };
 
@@ -22,12 +23,12 @@ use crate::{
 pub struct DynRecordRef<'r> {
     pub columns: Vec<Value>,
     // XXX: log encode should keep the same behavior
-    pub primary_index: usize,
+    pub primary_index: Vec<usize>,
     _marker: PhantomData<&'r ()>,
 }
 
 impl<'r> DynRecordRef<'r> {
-    pub(crate) fn new(columns: Vec<Value>, primary_index: usize) -> Self {
+    pub(crate) fn new(columns: Vec<Value>, primary_index: Vec<usize>) -> Self {
         Self {
             columns,
             primary_index,
@@ -44,7 +45,12 @@ impl<'r> Encode for DynRecordRef<'r> {
         W: Write,
     {
         (self.columns.len() as u32).encode(writer).await?;
-        (self.primary_index as u32).encode(writer).await?;
+        // (self.primary_index as u32).encode(writer).await?;
+        (self.primary_index.len() as u32).encode(writer).await?;
+        for idx in self.primary_index.iter() {
+            (*idx as u32).encode(writer).await?;
+        }
+        // self.primary_index.encode(writer).await?;
         for col in self.columns.iter() {
             col.encode(writer).await.map_err(RecordEncodeError::Fusio)?;
         }
@@ -64,10 +70,16 @@ impl<'r> RecordRef<'r> for DynRecordRef<'r> {
     type Record = DynRecord;
 
     fn key(self) -> <<<Self::Record as Record>::Schema as Schema>::Key as Key>::Ref<'r> {
-        self.columns
-            .get(self.primary_index)
-            .cloned()
-            .expect("The primary key must exist")
+        let mut keys = vec![];
+        for idx in self.primary_index.iter() {
+            let col = self
+                .columns
+                .get(*idx)
+                .cloned()
+                .expect("The primary key must exist");
+            keys.push(col);
+        }
+        PrimaryKey::new(keys)
     }
 
     fn from_record_batch(
@@ -81,9 +93,17 @@ impl<'r> RecordRef<'r> for DynRecordRef<'r> {
 
         let primary_index = metadata
             .get("primary_key_index")
-            .unwrap()
-            .parse::<usize>()
+            // .unwrap()
+            // .parse::<usize>()
             .unwrap();
+
+        // let primary_key_index = metadata.get("primary_key_index").unwrap();
+        // .parse::<usize>()
+        // .unwrap();
+        let primary_index = primary_index
+            .split(",")
+            .map(|v| v.parse::<usize>().unwrap())
+            .collect::<Vec<usize>>();
         let ts = record_batch
             .column(1)
             .as_primitive::<arrow::datatypes::UInt32Type>()
@@ -116,61 +136,61 @@ impl<'r> RecordRef<'r> for DynRecordRef<'r> {
                     offset,
                     idx,
                     projection_mask,
-                    primary_index == idx - 2,
+                    primary_index.contains(&(idx - 2)),
                 ),
                 DataType::UInt16 => Self::primitive_value::<UInt16Type>(
                     col,
                     offset,
                     idx,
                     projection_mask,
-                    primary_index == idx - 2,
+                    primary_index.contains(&(idx - 2)),
                 ),
                 DataType::UInt32 => Self::primitive_value::<UInt32Type>(
                     col,
                     offset,
                     idx,
                     projection_mask,
-                    primary_index == idx - 2,
+                    primary_index.contains(&(idx - 2)),
                 ),
                 DataType::UInt64 => Self::primitive_value::<UInt64Type>(
                     col,
                     offset,
                     idx,
                     projection_mask,
-                    primary_index == idx - 2,
+                    primary_index.contains(&(idx - 2)),
                 ),
                 DataType::Int8 => Self::primitive_value::<Int8Type>(
                     col,
                     offset,
                     idx,
                     projection_mask,
-                    primary_index == idx - 2,
+                    primary_index.contains(&(idx - 2)),
                 ),
                 DataType::Int16 => Self::primitive_value::<Int16Type>(
                     col,
                     offset,
                     idx,
                     projection_mask,
-                    primary_index == idx - 2,
+                    primary_index.contains(&(idx - 2)),
                 ),
                 DataType::Int32 => Self::primitive_value::<Int32Type>(
                     col,
                     offset,
                     idx,
                     projection_mask,
-                    primary_index == idx - 2,
+                    primary_index.contains(&(idx - 2)),
                 ),
                 DataType::Int64 => Self::primitive_value::<Int64Type>(
                     col,
                     offset,
                     idx,
                     projection_mask,
-                    primary_index == idx - 2,
+                    primary_index.contains(&(idx - 2)),
                 ),
                 DataType::Float32 => {
                     let v = col.as_primitive::<Float32Type>();
 
-                    if primary_index == idx - 2 {
+                    if primary_index.contains(&(idx - 2)) {
                         Arc::new(F32::from(v.value(offset))) as Arc<dyn Any + Send + Sync>
                     } else {
                         let value = (!v.is_null(offset) && projection_mask.leaf_included(idx))
@@ -181,7 +201,7 @@ impl<'r> RecordRef<'r> for DynRecordRef<'r> {
                 DataType::Float64 => {
                     let v = col.as_primitive::<Float64Type>();
 
-                    if primary_index == idx - 2 {
+                    if primary_index.contains(&(idx - 2)) {
                         Arc::new(F64::from(v.value(offset))) as Arc<dyn Any + Send + Sync>
                     } else {
                         let value = (!v.is_null(offset) && projection_mask.leaf_included(idx))
@@ -192,7 +212,7 @@ impl<'r> RecordRef<'r> for DynRecordRef<'r> {
                 DataType::String => {
                     let v = col.as_string::<i32>();
 
-                    if primary_index == idx - 2 {
+                    if primary_index.contains(&(idx - 2)) {
                         Arc::new(v.value(offset).to_owned()) as Arc<dyn Any + Send + Sync>
                     } else {
                         let value = (!v.is_null(offset) && projection_mask.leaf_included(idx))
@@ -203,7 +223,7 @@ impl<'r> RecordRef<'r> for DynRecordRef<'r> {
                 DataType::Boolean => {
                     let v = col.as_boolean();
 
-                    if primary_index == idx - 2 {
+                    if primary_index.contains(&(idx - 2)) {
                         Arc::new(v.value(offset).to_owned()) as Arc<dyn Any + Send + Sync>
                     } else {
                         let value = (!v.is_null(offset) && projection_mask.leaf_included(idx))
@@ -213,7 +233,7 @@ impl<'r> RecordRef<'r> for DynRecordRef<'r> {
                 }
                 DataType::Bytes => {
                     let v = col.as_binary::<i32>();
-                    if primary_index == idx - 2 {
+                    if primary_index.contains(&(idx - 2)) {
                         Arc::new(v.value(offset).to_owned()) as Arc<dyn Any + Send + Sync>
                     } else {
                         let value = (!v.is_null(offset) && projection_mask.leaf_included(idx))
@@ -240,7 +260,8 @@ impl<'r> RecordRef<'r> for DynRecordRef<'r> {
 
     fn projection(&mut self, projection_mask: &parquet::arrow::ProjectionMask) {
         for (idx, col) in self.columns.iter_mut().enumerate() {
-            if idx != self.primary_index && !projection_mask.leaf_included(idx + USER_COLUMN_OFFSET)
+            if !self.primary_index.contains(&idx)
+                && !projection_mask.leaf_included(idx + USER_COLUMN_OFFSET)
             {
                 match col.datatype() {
                     DataType::UInt8 => col.value = Arc::<Option<u8>>::new(None),

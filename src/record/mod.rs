@@ -29,7 +29,7 @@ pub trait Schema: Debug + Send + Sync {
     fn arrow_schema(&self) -> &Arc<ArrowSchema>;
 
     /// Returns the index of the primary key column.
-    fn primary_key_index(&self) -> usize;
+    fn primary_key_index(&self) -> Vec<usize>;
 
     /// Returns the ([`ColumnPath`], [`Vec<SortingColumn>`]) of the primary key column, representing
     /// the location of the primary key column in the parquet schema and the sort order within a

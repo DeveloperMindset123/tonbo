@@ -55,6 +55,9 @@ where
     R: Record,
 {
     local: BTreeMap<<R::Schema as RecordSchema>::Key, Option<R>>,
+    // pk: (a, b, c)
+    // a --> (a, b, c)
+    // mapping: BTreeMap<(), <R::Schema as RecordSchema>::Key>,
     snapshot: Snapshot<'txn, R>,
     lock_map: LockMap<<R::Schema as RecordSchema>::Key>,
 }
@@ -97,7 +100,10 @@ where
                         })
                         .collect::<Vec<usize>>();
 
-                    let mut fixed_projection = vec![0, 1, primary_key_index];
+                    let mut fixed_projection = [0, 1]
+                        .into_iter()
+                        .chain(primary_key_index.into_iter())
+                        .collect::<Vec<usize>>();
                     fixed_projection.append(&mut projection);
                     fixed_projection.dedup();
 
@@ -315,6 +321,7 @@ mod tests {
         record::{
             runtime::{test::test_dyn_item_schema, DataType, DynRecord, Value},
             test::StringSchema,
+            PrimaryKey,
         },
         tests::{build_db, build_schema, Test},
         transaction::CommitError,
@@ -952,14 +959,19 @@ mod tests {
                     false,
                 ),
             ],
-            0,
+            vec![0],
         ))
         .await
         .unwrap();
 
         let txn = db.transaction().await;
         {
-            let key = Value::new(DataType::Int8, "age".to_string(), Arc::new(1_i8), false);
+            let key = PrimaryKey::new(vec![Value::new(
+                DataType::Int8,
+                "age".to_string(),
+                Arc::new(1_i8),
+                false,
+            )]);
 
             let record_ref = txn.get(&key, Projection::All).await.unwrap();
             assert!(record_ref.is_some());
@@ -991,7 +1003,7 @@ mod tests {
                 .await
                 .unwrap();
             while let Some(entry) = scan.next().await.transpose().unwrap() {
-                assert_eq!(entry.value().unwrap().primary_index, 0);
+                assert_eq!(entry.value().unwrap().primary_index, vec![0]);
                 assert_eq!(entry.value().unwrap().columns.len(), 3);
                 let columns = entry.value().unwrap().columns;
                 dbg!(columns.clone());

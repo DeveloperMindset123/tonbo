@@ -4,7 +4,7 @@ use fusio::path::Path;
 use tonbo::{
     dyn_record, dyn_schema,
     executor::tokio::TokioExecutor,
-    record::{DataType, Value},
+    record::{DataType, PrimaryKey, Value},
     DbOption, DB,
 };
 
@@ -17,7 +17,8 @@ async fn main() {
     let options = DbOption::new(
         Path::from_filesystem_path("./db_path/users").unwrap(),
         &schema,
-    );
+    )
+    .primary_key(vec![0]);
     let db = DB::new(options, TokioExecutor::current(), schema)
         .await
         .unwrap();
@@ -34,12 +35,12 @@ async fn main() {
     }
 
     db.get(
-        &Value::new(
+        &PrimaryKey::new(vec![Value::new(
             DataType::String,
             "foo".into(),
             Arc::new("hello".to_owned()),
             false,
-        ),
+        )]),
         |v| {
             let v = v.get();
             println!("{:?}", v.columns[0].value.downcast_ref::<String>());

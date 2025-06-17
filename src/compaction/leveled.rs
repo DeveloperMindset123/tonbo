@@ -426,7 +426,7 @@ pub(crate) mod tests {
             immutable::{tests::TestSchema, Immutable},
             mutable::MutableMemTable,
         },
-        record::{DataType, DynRecord, DynSchema, Record, Schema, Value, ValueDesc},
+        record::{DataType, DynRecord, DynSchema, PrimaryKey, Record, Schema, Value, ValueDesc},
         scope::Scope,
         tests::Test,
         timestamp::Timestamp,
@@ -575,7 +575,7 @@ pub(crate) mod tests {
         let manager = StoreManager::new(FsOptions::Local, vec![]).unwrap();
         let schema = DynSchema::new(
             vec![ValueDesc::new("id".to_owned(), DataType::Int32, false)],
-            0,
+            vec![0],
         );
         let option = DbOption::new(
             Path::from_filesystem_path(temp_dir.path()).unwrap(),
@@ -597,9 +597,9 @@ pub(crate) mod tests {
                 continue;
             }
             if i < 35 && (i % 2 == 0 || i % 5 == 0) {
-                batch1_data.push((LogType::Full, DynRecord::new(vec![col], 0), 0.into()));
+                batch1_data.push((LogType::Full, DynRecord::new(vec![col], vec![0]), 0.into()));
             } else if i >= 7 {
-                batch2_data.push((LogType::Full, DynRecord::new(vec![col], 0), 0.into()));
+                batch2_data.push((LogType::Full, DynRecord::new(vec![col], vec![0]), 0.into()));
             }
         }
 
@@ -630,11 +630,21 @@ pub(crate) mod tests {
         .unwrap();
         assert_eq!(
             scope.min,
-            Value::new(DataType::Int32, "id".to_owned(), Arc::new(2), false)
+            PrimaryKey::new(vec![Value::new(
+                DataType::Int32,
+                "id".to_owned(),
+                Arc::new(2),
+                false
+            )])
         );
         assert_eq!(
             scope.max,
-            Value::new(DataType::Int32, "id".to_owned(), Arc::new(39), false)
+            PrimaryKey::new(vec![Value::new(
+                DataType::Int32,
+                "id".to_owned(),
+                Arc::new(39),
+                false
+            )])
         );
     }
 

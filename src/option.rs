@@ -7,6 +7,7 @@ pub use fusio_dispatch::FsOptions;
 use parquet::{
     basic::Compression,
     file::properties::{EnabledStatistics, WriterProperties},
+    format::SortingColumn,
 };
 use thiserror::Error;
 
@@ -66,7 +67,6 @@ impl DbOption {
                 .set_sorting_columns(Some(sorting_columns))
                 .set_created_by(concat!("tonbo version ", env!("CARGO_PKG_VERSION")).to_owned())
                 .build(),
-
             use_wal: true,
             wal_buffer_size: DEFAULT_WAL_BUFFER_SIZE,
             major_default_oldest_table_num: 3,
@@ -81,6 +81,26 @@ impl DbOption {
 }
 
 impl DbOption {
+    pub fn primary_key(self, primary_key_indices: Vec<usize>) -> Self {
+        let mut sorting_columns = Vec::with_capacity(primary_key_indices.len() + 1);
+        sorting_columns.push(SortingColumn::new(1_i32, true, true));
+        for idx in primary_key_indices.iter() {
+            sorting_columns.push(SortingColumn::new(*idx as i32, true, true));
+        }
+        // let column_path = ColumnPath::new(vec![
+        //     magic::TS.to_string(),
+        //     self.schema[self.primary_index].name.clone(),
+        // ]);
+        // let write_parquet_properties = self
+        //     .write_parquet_properties
+        //     .set_sorting_columns(Some(sorting_columns));
+        // Self {
+        //     write_parquet_properties,
+        //     ..self
+        // }
+        todo!()
+    }
+
     /// build the [`DB`](crate::DB) storage directory based on the passed path
     pub fn path(self, path: impl Into<Path>) -> Self {
         DbOption {

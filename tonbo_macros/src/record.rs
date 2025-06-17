@@ -394,8 +394,8 @@ fn struct_schema_codegen(
 
             type Key = #primary_key_ty;
 
-            fn primary_key_index(&self) -> usize {
-                #primary_key_index
+            fn primary_key_index(&self) -> Vec<usize> {
+                vec![#primary_key_index]
             }
 
             fn primary_key_path(&self) -> (::tonbo::parquet::schema::types::ColumnPath, Vec<::tonbo::parquet::format::SortingColumn>) {
